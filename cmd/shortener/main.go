@@ -21,10 +21,8 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		{
-			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Content-Type", "text/plain")
 			w.WriteHeader(http.StatusTemporaryRedirect)
-
-			// пока установим ответ-заглушку, без проверки ошибок
 			_, _ = w.Write([]byte(`
       {
         "response": {
@@ -37,9 +35,8 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 
 	case http.MethodPost:
 		{
-			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Content-Type", "text/plain")
 			w.WriteHeader(http.StatusCreated)
-			// пока установим ответ-заглушку, без проверки ошибок
 			_, _ = w.Write([]byte(`
       {
         "response": {
