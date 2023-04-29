@@ -55,8 +55,9 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 			id := strings.Split(r.RequestURI, "/")[len(strings.Split(r.RequestURI, "/"))-1]
 
 			w.Header().Set("Content-Type", "text/plain")
+			w.Header().Set("Location", fmt.Sprintf("Location: %s", shortURL[id]))
 			w.WriteHeader(http.StatusTemporaryRedirect)
-			_, _ = w.Write([]byte(fmt.Sprintf("Location: %s", shortURL[id])))
+			//_, _ = w.Write([]byte(fmt.Sprintf("Location: %s", shortURL[id])))
 
 		}
 
