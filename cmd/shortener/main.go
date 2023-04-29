@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	shortUrl = map[string]string{
+	shortURL = map[string]string{
 		"094c4130-9674-4c18-bf60-7385d7f61934": "https://practicum.yandex.ru/",
 	}
 )
@@ -40,7 +40,7 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				log.Fatal(err)
 			}
-			shortUrl[id] = string(bodyBytes)
+			shortURL[id] = string(bodyBytes)
 
 			w.Header().Set("Content-Type", "text/plain")
 			w.WriteHeader(http.StatusCreated)
@@ -56,7 +56,7 @@ func webhook(w http.ResponseWriter, r *http.Request) {
 
 			w.Header().Set("Content-Type", "text/plain")
 			w.WriteHeader(http.StatusTemporaryRedirect)
-			_, _ = w.Write([]byte(fmt.Sprintf("Location: %s", shortUrl[id])))
+			_, _ = w.Write([]byte(fmt.Sprintf("Location: %s", shortURL[id])))
 
 		}
 
