@@ -39,7 +39,6 @@ func TestRouter(t *testing.T) {
 		expectedBody string
 	}{
 		{url: `/`, method: http.MethodGet, expectedCode: http.StatusBadRequest, expectedBody: ""},
-		//{url: `/094c4130-9674-4c18-bf60-7385d7f61934`, method: http.MethodGet, expectedCode: http.StatusTemporaryRedirect, expectedBody: ""},
 		{url: `/`, method: http.MethodPost, expectedCode: http.StatusCreated, expectedBody: successBodyRegex},
 		{url: `/`, method: http.MethodPut, expectedCode: http.StatusBadRequest, expectedBody: ""},
 		{url: `/`, method: http.MethodPatch, expectedCode: http.StatusBadRequest, expectedBody: ""},
