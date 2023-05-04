@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"io"
 	"log"
@@ -15,57 +16,46 @@ var (
 	}
 )
 
+func createShortUrl(rw http.ResponseWriter, r *http.Request) {
+	log.Println("Create short url")
+	id := uuid.New().String()
+	bodyBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	shortURL[id] = string(bodyBytes)
+
+	rw.Header().Set("Content-Type", "text/plain")
+	rw.WriteHeader(http.StatusCreated)
+
+	_, _ = rw.Write([]byte(fmt.Sprintf("http://localhost:8080/%s", id)))
+}
+
+func readShortUrl(rw http.ResponseWriter, r *http.Request) {
+	log.Println("Get short url")
+
+	id := strings.Split(r.RequestURI, "/")[len(strings.Split(r.RequestURI, "/"))-1]
+
+	rw.Header().Set("Content-Type", "text/plain")
+	rw.Header().Set("Location", shortURL[id])
+	rw.WriteHeader(http.StatusTemporaryRedirect)
+}
+
+func methodNotAllowed(rw http.ResponseWriter, r *http.Request) {
+	log.Println("Method Not Allowed")
+	rw.WriteHeader(http.StatusBadRequest)
+}
+
+func Router() chi.Router {
+	r := chi.NewRouter()
+
+	r.Post("/", createShortUrl)
+	r.Get("/", readShortUrl)
+	r.MethodNotAllowed(methodNotAllowed)
+	return r
+}
+
 func main() {
-	if err := run(); err != nil {
-		panic(err)
-	}
-}
 
-func run() error {
-	mux := http.NewServeMux()
-	mux.HandleFunc(`/`, http.HandlerFunc(webhook))
-
-	return http.ListenAndServe(`:8080`, mux)
-}
-
-func webhook(w http.ResponseWriter, r *http.Request) {
-
-	switch r.Method {
-
-	case http.MethodPost:
-		{
-			log.Println("Create short url")
-			id := uuid.New().String()
-			bodyBytes, err := io.ReadAll(r.Body)
-			if err != nil {
-				log.Fatal(err)
-			}
-			shortURL[id] = string(bodyBytes)
-
-			w.Header().Set("Content-Type", "text/plain")
-			w.WriteHeader(http.StatusCreated)
-
-			_, _ = w.Write([]byte(fmt.Sprintf("http://localhost:8080/%s", id)))
-		}
-
-	case http.MethodGet:
-		{
-			log.Println("Get short url")
-
-			id := strings.Split(r.RequestURI, "/")[len(strings.Split(r.RequestURI, "/"))-1]
-
-			w.Header().Set("Content-Type", "text/plain")
-			w.Header().Set("Location", shortURL[id])
-			w.WriteHeader(http.StatusTemporaryRedirect)
-
-		}
-
-	default:
-		{
-			log.Println("Bad Request")
-
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-	}
+	log.Fatal(http.ListenAndServe(":8080", Router()))
 }
