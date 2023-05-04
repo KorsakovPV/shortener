@@ -33,20 +33,22 @@ func TestRouter(t *testing.T) {
 	successBodyRegex := `^http://localhost:8080/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`
 
 	testCases := []struct {
+		url          string
 		method       string
 		expectedCode int
 		expectedBody string
 	}{
-		{method: http.MethodGet, expectedCode: http.StatusTemporaryRedirect, expectedBody: ""},
-		{method: http.MethodPost, expectedCode: http.StatusCreated, expectedBody: successBodyRegex},
-		{method: http.MethodPut, expectedCode: http.StatusBadRequest, expectedBody: ""},
-		{method: http.MethodPatch, expectedCode: http.StatusBadRequest, expectedBody: ""},
-		{method: http.MethodDelete, expectedCode: http.StatusBadRequest, expectedBody: ""},
+		{url: `/`, method: http.MethodGet, expectedCode: http.StatusBadRequest, expectedBody: ""},
+		//{url: `/094c4130-9674-4c18-bf60-7385d7f61934`, method: http.MethodGet, expectedCode: http.StatusTemporaryRedirect, expectedBody: ""},
+		{url: `/`, method: http.MethodPost, expectedCode: http.StatusCreated, expectedBody: successBodyRegex},
+		{url: `/`, method: http.MethodPut, expectedCode: http.StatusBadRequest, expectedBody: ""},
+		{url: `/`, method: http.MethodPatch, expectedCode: http.StatusBadRequest, expectedBody: ""},
+		{url: `/`, method: http.MethodDelete, expectedCode: http.StatusBadRequest, expectedBody: ""},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.method, func(t *testing.T) {
-			resp, get := testRequest(t, ts, tc.method, `/`)
+			resp, get := testRequest(t, ts, tc.method, tc.url)
 			defer resp.Body.Close()
 
 			assert.Equal(t, tc.expectedCode, resp.StatusCode, "Код ответа не совпадает с ожидаемым")

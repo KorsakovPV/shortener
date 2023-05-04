@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strings"
 )
 
 var (
@@ -34,14 +33,15 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 func readShortURL(rw http.ResponseWriter, r *http.Request) {
 	log.Println("Get short url")
 
-	id := strings.Split(r.RequestURI, "/")[len(strings.Split(r.RequestURI, "/"))-1]
+	//id := strings.Split(r.RequestURI, "/")[len(strings.Split(r.RequestURI, "/"))-1]
+	id := chi.URLParam(r, "id")
 
 	rw.Header().Set("Content-Type", "text/plain")
 	rw.Header().Set("Location", shortURL[id])
 	rw.WriteHeader(http.StatusTemporaryRedirect)
 }
 
-func methodNotAllowed(rw http.ResponseWriter, _ *http.Request) {
+func methodNotAllowed(rw http.ResponseWriter, r *http.Request) {
 	log.Println("Method Not Allowed")
 	rw.WriteHeader(http.StatusBadRequest)
 }
@@ -49,8 +49,8 @@ func methodNotAllowed(rw http.ResponseWriter, _ *http.Request) {
 func Router() chi.Router {
 	r := chi.NewRouter()
 
+	r.Get("/{id}", readShortURL)
 	r.Post("/", createShortURL)
-	r.Get("/", readShortURL)
 	r.MethodNotAllowed(methodNotAllowed)
 	return r
 }
