@@ -18,15 +18,9 @@ func testRequest(t *testing.T, ts *httptest.Server, method,
 
 	resp, err := ts.Client().Do(req)
 	require.NoError(t, err)
+	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			return
-		}
-	}(resp.Body)
-
 	require.NoError(t, err)
 
 	return resp, string(respBody)
@@ -53,6 +47,7 @@ func TestRouter(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.method, func(t *testing.T) {
 			resp, get := testRequest(t, ts, tc.method, `/`)
+			defer resp.Body.Close()
 
 			assert.Equal(t, tc.expectedCode, resp.StatusCode, "Код ответа не совпадает с ожидаемым")
 			if tc.expectedBody != "" {
