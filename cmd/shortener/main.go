@@ -16,7 +16,7 @@ var (
 	}
 )
 
-func createShortUrl(rw http.ResponseWriter, r *http.Request) {
+func createShortURL(rw http.ResponseWriter, r *http.Request) {
 	log.Println("Create short url")
 	id := uuid.New().String()
 	bodyBytes, err := io.ReadAll(r.Body)
@@ -31,7 +31,7 @@ func createShortUrl(rw http.ResponseWriter, r *http.Request) {
 	_, _ = rw.Write([]byte(fmt.Sprintf("http://localhost:8080/%s", id)))
 }
 
-func readShortUrl(rw http.ResponseWriter, r *http.Request) {
+func readShortURL(rw http.ResponseWriter, r *http.Request) {
 	log.Println("Get short url")
 
 	id := strings.Split(r.RequestURI, "/")[len(strings.Split(r.RequestURI, "/"))-1]
@@ -41,7 +41,7 @@ func readShortUrl(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusTemporaryRedirect)
 }
 
-func methodNotAllowed(rw http.ResponseWriter, r *http.Request) {
+func methodNotAllowed(rw http.ResponseWriter, _ *http.Request) {
 	log.Println("Method Not Allowed")
 	rw.WriteHeader(http.StatusBadRequest)
 }
@@ -49,8 +49,8 @@ func methodNotAllowed(rw http.ResponseWriter, r *http.Request) {
 func Router() chi.Router {
 	r := chi.NewRouter()
 
-	r.Post("/", createShortUrl)
-	r.Get("/", readShortUrl)
+	r.Post("/", createShortURL)
+	r.Get("/", readShortURL)
 	r.MethodNotAllowed(methodNotAllowed)
 	return r
 }
