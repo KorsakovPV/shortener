@@ -27,13 +27,12 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "text/plain")
 	rw.WriteHeader(http.StatusCreated)
 
-	_, _ = rw.Write([]byte(fmt.Sprintf("http://localhost:8080/%s", id)))
+	_, _ = rw.Write([]byte(fmt.Sprintf("http://%s/%s", config.flagBaseURLAddr, id)))
 }
 
 func readShortURL(rw http.ResponseWriter, r *http.Request) {
 	log.Println("Get short url")
 
-	//id := strings.Split(r.RequestURI, "/")[len(strings.Split(r.RequestURI, "/"))-1]
 	id := chi.URLParam(r, "id")
 
 	rw.Header().Set("Content-Type", "text/plain")
@@ -57,5 +56,9 @@ func Router() chi.Router {
 
 func main() {
 
-	log.Fatal(http.ListenAndServe(":8080", Router()))
+	parseFlags()
+
+	log.Printf("Shortener start on %s. Default base URL %s.", config.flagRunAddr, config.flagBaseURLAddr)
+
+	log.Fatal(http.ListenAndServe(config.flagRunAddr, Router()))
 }
