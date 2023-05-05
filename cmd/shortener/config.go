@@ -17,11 +17,11 @@ func parseFlags() {
 	flag.StringVar(&config.flagBaseURLAddr, "b", "http://localhost:8080", "address and port to run server")
 	flag.Parse()
 
-	if envRunAddr := os.Getenv("RUN_ADDR"); envRunAddr != "" {
+	if envRunAddr := os.Getenv("SERVER_ADDRESS"); envRunAddr != "" {
 		config.flagRunAddr = envRunAddr
 	}
 
-	if envBaseURLAddr := os.Getenv("RUN_ADDR"); envBaseURLAddr != "" {
+	if envBaseURLAddr := os.Getenv("BASE_URL"); envBaseURLAddr != "" {
 		config.flagBaseURLAddr = envBaseURLAddr
 	}
 }
