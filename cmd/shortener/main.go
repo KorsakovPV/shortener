@@ -27,7 +27,7 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "text/plain")
 	rw.WriteHeader(http.StatusCreated)
 
-	_, _ = rw.Write([]byte(fmt.Sprintf("http://%s/%s", config.flagBaseURLAddr, id)))
+	_, _ = rw.Write([]byte(fmt.Sprintf("%s/%s", config.flagBaseURLAddr, id)))
 }
 
 func readShortURL(rw http.ResponseWriter, r *http.Request) {
