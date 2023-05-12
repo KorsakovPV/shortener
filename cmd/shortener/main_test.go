@@ -55,7 +55,6 @@ func TestRouter(t *testing.T) {
 			if tc.expectedBody != "" {
 				match, _ := regexp.MatchString(tc.expectedBody, get)
 				fmt.Println(get, match)
-
 			}
 		})
 	}
