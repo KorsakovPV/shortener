@@ -16,6 +16,7 @@ var (
 )
 
 func createShortURL(rw http.ResponseWriter, r *http.Request) {
+	cfg := NewConfig()
 	log.Println("Create short url")
 	id := uuid.New().String()
 	bodyBytes, err := io.ReadAll(r.Body)
@@ -27,7 +28,7 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "text/plain")
 	rw.WriteHeader(http.StatusCreated)
 
-	_, _ = rw.Write([]byte(fmt.Sprintf("%s/%s", config.flagBaseURLAddr, id)))
+	_, _ = rw.Write([]byte(fmt.Sprintf("%s/%s", cfg.FlagBaseURLAddr, id)))
 }
 
 func readShortURL(rw http.ResponseWriter, r *http.Request) {
@@ -56,9 +57,9 @@ func Router() chi.Router {
 
 func main() {
 
-	parseFlags()
+	cfg := NewConfig()
 
-	log.Printf("Shortener start on %s. Default base URL %s.", config.flagRunAddr, config.flagBaseURLAddr)
+	log.Printf("Shortener start on %s. Default base URL %s.", cfg.FlagRunAddr, cfg.FlagBaseURLAddr)
 
-	log.Fatal(http.ListenAndServe(config.flagRunAddr, Router()))
+	log.Fatal(http.ListenAndServe(cfg.FlagRunAddr, Router()))
 }

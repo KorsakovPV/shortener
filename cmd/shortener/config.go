@@ -5,23 +5,27 @@ import (
 	"os"
 )
 
-type configuration struct {
-	flagRunAddr     string
-	flagBaseURLAddr string
+type Config struct {
+	FlagRunAddr     string
+	FlagBaseURLAddr string
 }
 
-var config = &configuration{}
+//var config = &configuration{}
 
-func parseFlags() {
-	flag.StringVar(&config.flagRunAddr, "a", "localhost:8080", "address and port to run server")
-	flag.StringVar(&config.flagBaseURLAddr, "b", "http://localhost:8080", "address and port to run server")
+func NewConfig() *Config {
+	cfg := &Config{}
+
+	flag.StringVar(&cfg.FlagRunAddr, "a", "127.0.0.1:8080", "address and port to run server")
+	flag.StringVar(&cfg.FlagBaseURLAddr, "b", "http://127.0.0.1:8080", "address and port to run server")
 	flag.Parse()
 
 	if envRunAddr := os.Getenv("SERVER_ADDRESS"); envRunAddr != "" {
-		config.flagRunAddr = envRunAddr
+		cfg.FlagRunAddr = envRunAddr
 	}
 
 	if envBaseURLAddr := os.Getenv("BASE_URL"); envBaseURLAddr != "" {
-		config.flagBaseURLAddr = envBaseURLAddr
+		cfg.FlagBaseURLAddr = envBaseURLAddr
 	}
+
+	return cfg
 }
