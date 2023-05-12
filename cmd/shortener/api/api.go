@@ -35,7 +35,6 @@ var (
 
 func createShortURL(rw http.ResponseWriter, r *http.Request) {
 	cfg := config.NewConfig()
-	var ls abstractStorage = &localStorage{}
 
 	log.Println("Create short url")
 
@@ -43,15 +42,18 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	var ls abstractStorage = &localStorage{}
 	id := ls.putURL(string(bodyBytes))
 
 	rw.Header().Set("Content-Type", "text/plain")
 	rw.WriteHeader(http.StatusCreated)
 
-	_, err = fmt.Fprintf(rw, "%s/%s", cfg.FlagBaseURLAddr, id)
-	if err != nil {
-		return
-	}
+	_, _ = rw.Write([]byte(fmt.Sprintf("%s/%s", cfg.FlagBaseURLAddr, id)))
+	//_, err = fmt.Fprintf(rw, "%s/%s", cfg.FlagBaseURLAddr, id)
+	//if err != nil {
+	//	return
+	//}
 }
 
 func readShortURL(rw http.ResponseWriter, r *http.Request) {

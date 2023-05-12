@@ -15,8 +15,8 @@ type Config struct {
 func NewConfig() *Config {
 	cfg := &Config{}
 
-	flag.StringVar(&cfg.FlagRunAddr, "a", "localhost:8080", "address and port to run server")
-	flag.StringVar(&cfg.FlagBaseURLAddr, "b", "http://localhost:8080", "address and port to run server")
+	flag.StringVar(&cfg.FlagRunAddr, "a", "127.0.0.1:8080", "address and port to run server")
+	flag.StringVar(&cfg.FlagBaseURLAddr, "b", "http://127.0.0.1:8080", "address and port to run server")
 	flag.Parse()
 
 	if envRunAddr := os.Getenv("SERVER_ADDRESS"); envRunAddr != "" {
