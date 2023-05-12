@@ -9,6 +9,23 @@ import (
 	"net/http"
 )
 
+type abstractStorage interface {
+	putURL(string) string
+	getURL(string) string
+}
+
+type localStorage struct{}
+
+func (s *localStorage) putURL(body string) string {
+	id := uuid.New().String()
+	shortURL[id] = body
+	return id
+}
+
+func (s *localStorage) getURL(id string) string {
+	return shortURL[id]
+}
+
 var (
 	shortURL = map[string]string{
 		"094c4130-9674-4c18-bf60-7385d7f61934": "https://practicum.yandex.ru/",
@@ -16,28 +33,35 @@ var (
 )
 
 func createShortURL(rw http.ResponseWriter, r *http.Request) {
-	cfg := NewConfig()
+	//cfg := config.NewConfig()
+
 	log.Println("Create short url")
-	id := uuid.New().String()
+
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Fatal(err)
 	}
-	shortURL[id] = string(bodyBytes)
+
+	var ls abstractStorage = &localStorage{}
+	id := ls.putURL(string(bodyBytes))
 
 	rw.Header().Set("Content-Type", "text/plain")
 	rw.WriteHeader(http.StatusCreated)
 
-	_, _ = rw.Write([]byte(fmt.Sprintf("%s/%s", cfg.FlagBaseURLAddr, id)))
+	_, _ = rw.Write([]byte(fmt.Sprintf("%s/%s", config.flagBaseURLAddr, id)))
+	//_, err = fmt.Fprintf(rw, "%s/%s", cfg.FlagBaseURLAddr, id)
+	//if err != nil {
+	//	return
+	//}
 }
 
 func readShortURL(rw http.ResponseWriter, r *http.Request) {
 	log.Println("Get short url")
 
-	id := chi.URLParam(r, "id")
+	var ls abstractStorage = &localStorage{}
 
 	rw.Header().Set("Content-Type", "text/plain")
-	rw.Header().Set("Location", shortURL[id])
+	rw.Header().Set("Location", ls.getURL(chi.URLParam(r, "id")))
 	rw.WriteHeader(http.StatusTemporaryRedirect)
 }
 
@@ -57,9 +81,9 @@ func Router() chi.Router {
 
 func main() {
 
-	cfg := NewConfig()
+	parseFlags()
 
-	log.Printf("Shortener start on %s. Default base URL %s.", cfg.FlagRunAddr, cfg.FlagBaseURLAddr)
+	log.Printf("Shortener start on %s. Default base URL %s.", config.flagRunAddr, config.flagBaseURLAddr)
 
-	log.Fatal(http.ListenAndServe(cfg.FlagRunAddr, Router()))
+	log.Fatal(http.ListenAndServe(config.flagRunAddr, Router()))
 }
