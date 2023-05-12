@@ -1,64 +1,21 @@
 package main
 
 import (
-	"fmt"
-	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
-	"io"
+	api "github.com/KorsakovPV/shortener/cmd/shortener/api"
+	config "github.com/KorsakovPV/shortener/cmd/shortener/config"
+	//"github.com/xlab/closer"
 	"log"
 	"net/http"
 )
 
-var (
-	shortURL = map[string]string{
-		"094c4130-9674-4c18-bf60-7385d7f61934": "https://practicum.yandex.ru/",
-	}
-)
-
-func createShortURL(rw http.ResponseWriter, r *http.Request) {
-	log.Println("Create short url")
-	id := uuid.New().String()
-	bodyBytes, err := io.ReadAll(r.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-	shortURL[id] = string(bodyBytes)
-
-	rw.Header().Set("Content-Type", "text/plain")
-	rw.WriteHeader(http.StatusCreated)
-
-	_, _ = rw.Write([]byte(fmt.Sprintf("%s/%s", config.flagBaseURLAddr, id)))
-}
-
-func readShortURL(rw http.ResponseWriter, r *http.Request) {
-	log.Println("Get short url")
-
-	id := chi.URLParam(r, "id")
-
-	rw.Header().Set("Content-Type", "text/plain")
-	rw.Header().Set("Location", shortURL[id])
-	rw.WriteHeader(http.StatusTemporaryRedirect)
-}
-
-func methodNotAllowed(rw http.ResponseWriter, r *http.Request) {
-	log.Println("Method Not Allowed")
-	rw.WriteHeader(http.StatusBadRequest)
-}
-
-func Router() chi.Router {
-	r := chi.NewRouter()
-
-	r.Get("/{id}", readShortURL)
-	r.Post("/", createShortURL)
-	r.MethodNotAllowed(methodNotAllowed)
-	return r
-}
-
 func main() {
+	//closer.Bind(cleanup)
+	//_, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	//defer stop()
 
-	parseFlags()
+	cfg := config.NewConfig()
 
-	log.Printf("Shortener start on %s. Default base URL %s.", config.flagRunAddr, config.flagBaseURLAddr)
+	log.Printf("Shortener start on %s. Default base URL %s.", cfg.FlagRunAddr, cfg.FlagBaseURLAddr)
 
-	log.Fatal(http.ListenAndServe(config.flagRunAddr, Router()))
+	log.Fatal(http.ListenAndServe(cfg.FlagRunAddr, api.Router()))
 }
