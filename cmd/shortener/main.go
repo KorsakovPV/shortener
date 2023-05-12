@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/KorsakovPV/shortener/cmd/shortener/config"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"io"
@@ -48,7 +49,7 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "text/plain")
 	rw.WriteHeader(http.StatusCreated)
 
-	_, _ = rw.Write([]byte(fmt.Sprintf("%s/%s", config.flagBaseURLAddr, id)))
+	_, _ = rw.Write([]byte(fmt.Sprintf("%s/%s", config.Config.FlagBaseURLAddr, id)))
 	//_, err = fmt.Fprintf(rw, "%s/%s", cfg.FlagBaseURLAddr, id)
 	//if err != nil {
 	//	return
@@ -81,9 +82,9 @@ func Router() chi.Router {
 
 func main() {
 
-	parseFlags()
+	config.ParseFlags()
 
-	log.Printf("Shortener start on %s. Default base URL %s.", config.flagRunAddr, config.flagBaseURLAddr)
+	log.Printf("Shortener start on %s. Default base URL %s.", config.Config.FlagRunAddr, config.Config.FlagBaseURLAddr)
 
-	log.Fatal(http.ListenAndServe(config.flagRunAddr, Router()))
+	log.Fatal(http.ListenAndServe(config.Config.FlagRunAddr, Router()))
 }
