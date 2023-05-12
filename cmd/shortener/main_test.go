@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/KorsakovPV/shortener/cmd/shortener/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io"
@@ -28,7 +27,7 @@ func testRequest(t *testing.T, ts *httptest.Server, method,
 }
 
 func TestRouter(t *testing.T) {
-	ts := httptest.NewServer(api.Router())
+	ts := httptest.NewServer(Router())
 	defer ts.Close()
 
 	successBodyRegex := `^http://localhost:8080/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`
