@@ -34,7 +34,6 @@ var (
 )
 
 func createShortURL(rw http.ResponseWriter, r *http.Request) {
-	//cfg := config.NewConfig()
 
 	log.Println("Create short url")
 
@@ -49,11 +48,11 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "text/plain")
 	rw.WriteHeader(http.StatusCreated)
 
-	_, _ = rw.Write([]byte(fmt.Sprintf("%s/%s", config.Config.FlagBaseURLAddr, id)))
-	//_, err = fmt.Fprintf(rw, "%s/%s", cfg.FlagBaseURLAddr, id)
-	//if err != nil {
-	//	return
-	//}
+	//_, _ = rw.Write([]byte(fmt.Sprintf("%s/%s", config.Config.FlagBaseURLAddr, id)))
+	_, err = fmt.Fprintf(rw, "%s/%s", config.Config.FlagBaseURLAddr, id)
+	if err != nil {
+		return
+	}
 }
 
 func readShortURL(rw http.ResponseWriter, r *http.Request) {
