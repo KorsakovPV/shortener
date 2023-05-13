@@ -23,7 +23,3 @@ func (s *LocalStorageStruct) GetURL(id string) (string, error) {
 		return url, nil
 	}
 }
-
-//var LocalStorage AbstractStorage = &localStorageStruct{
-//	shortURL: map[string]string{},
-//}
