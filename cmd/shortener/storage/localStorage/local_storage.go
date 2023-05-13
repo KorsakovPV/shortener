@@ -1,4 +1,4 @@
-package local_storage
+package localStorage
 
 import "github.com/google/uuid"
 
