@@ -15,7 +15,9 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("ERROR Can't get value from body. %s", err)
+		rw.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	id := storage.LocalStorage.PutURL(string(bodyBytes))
@@ -25,15 +27,25 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 
 	_, err = fmt.Fprintf(rw, "%s/%s", config.Config.FlagBaseURLAddr, id)
 	if err != nil {
+		log.Printf("ERROR Can't writing content to HTTP response. %s", err)
+		rw.WriteHeader(http.StatusBadRequest)
 		return
 	}
 }
 
 func readShortURL(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "text/plain")
-	log.Printf("Get short url %s xxx", storage.LocalStorage.GetURL(chi.URLParam(r, "id")))
+	shortURL, err := storage.LocalStorage.GetURL(chi.URLParam(r, "id"))
 
-	rw.Header().Set("Location", storage.LocalStorage.GetURL(chi.URLParam(r, "id")))
+	if err != nil {
+		log.Printf("ERROR %s", err)
+		rw.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	rw.Header().Set("Content-Type", "text/plain")
+	log.Printf("Get short url %s", shortURL)
+
+	rw.Header().Set("Location", shortURL)
 	rw.WriteHeader(http.StatusTemporaryRedirect)
 }
 

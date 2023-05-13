@@ -13,5 +13,9 @@ func main() {
 
 	log.Printf("Shortener start on %s. Default base URL %s.", config.Config.FlagRunAddr, config.Config.FlagBaseURLAddr)
 
-	log.Fatal(http.ListenAndServe(config.Config.FlagRunAddr, apiserver.Router()))
+	err := http.ListenAndServe(config.Config.FlagRunAddr, apiserver.Router())
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }

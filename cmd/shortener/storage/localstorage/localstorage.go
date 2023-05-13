@@ -1,6 +1,9 @@
 package localstorage
 
-import "github.com/google/uuid"
+import (
+	"fmt"
+	"github.com/google/uuid"
+)
 
 type LocalStorageStruct struct {
 	ShortURL map[string]string
@@ -12,8 +15,13 @@ func (s *LocalStorageStruct) PutURL(body string) string {
 	return id
 }
 
-func (s *LocalStorageStruct) GetURL(id string) string {
-	return s.ShortURL[id]
+func (s *LocalStorageStruct) GetURL(id string) (string, error) {
+	url, ok := s.ShortURL[id]
+	if ok == false {
+		return url, fmt.Errorf("id %s not found", id)
+	} else {
+		return url, nil
+	}
 }
 
 //var LocalStorage AbstractStorage = &localStorageStruct{
