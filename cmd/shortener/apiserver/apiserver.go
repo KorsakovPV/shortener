@@ -11,26 +11,25 @@ import (
 	"net/http"
 )
 
-type localStorage struct{}
+type localStorage struct {
+	shortURL map[string]string
+}
 
 func (s *localStorage) PutURL(body string) string {
 	id := uuid.New().String()
-	shortURL[id] = body
+	s.shortURL[id] = body
 	return id
 }
 
 func (s *localStorage) GetURL(id string) string {
-	return shortURL[id]
+	return s.shortURL[id]
 }
 
-var (
-	shortURL = map[string]string{
-		"094c4130-9674-4c18-bf60-7385d7f61934": "https://practicum.yandex.ru/",
-	}
-)
+var ls storage.AbstractStorage = &localStorage{
+	shortURL: map[string]string{},
+}
 
 func createShortURL(rw http.ResponseWriter, r *http.Request) {
-
 	log.Println("Create short url")
 
 	bodyBytes, err := io.ReadAll(r.Body)
@@ -38,7 +37,6 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	var ls storage.AbstractStorage = &localStorage{}
 	id := ls.PutURL(string(bodyBytes))
 
 	rw.Header().Set("Content-Type", "text/plain")
@@ -51,8 +49,6 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 }
 
 func readShortURL(rw http.ResponseWriter, r *http.Request) {
-	var ls storage.AbstractStorage = &localStorage{}
-
 	rw.Header().Set("Content-Type", "text/plain")
 	log.Printf("Get short url %s xxx", ls.GetURL(chi.URLParam(r, "id")))
 
