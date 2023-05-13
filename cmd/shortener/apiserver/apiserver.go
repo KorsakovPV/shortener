@@ -11,21 +11,23 @@ import (
 	"net/http"
 )
 
-type localStorage struct {
-	shortURL map[string]string
-}
+type localStorage struct{}
 
 func (s *localStorage) PutURL(body string) string {
 	id := uuid.New().String()
-	s.shortURL[id] = body
+	shortURL[id] = body
 	return id
 }
 
 func (s *localStorage) GetURL(id string) string {
-	return s.shortURL[id]
+	return shortURL[id]
 }
 
-var ls storage.AbstractStorage = &localStorage{}
+var (
+	shortURL = map[string]string{
+		"094c4130-9674-4c18-bf60-7385d7f61934": "https://practicum.yandex.ru/",
+	}
+)
 
 func createShortURL(rw http.ResponseWriter, r *http.Request) {
 
@@ -36,6 +38,7 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
+	var ls storage.AbstractStorage = &localStorage{}
 	id := ls.PutURL(string(bodyBytes))
 
 	rw.Header().Set("Content-Type", "text/plain")
@@ -48,9 +51,11 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 }
 
 func readShortURL(rw http.ResponseWriter, r *http.Request) {
-	log.Println("Get short url")
+	var ls storage.AbstractStorage = &localStorage{}
 
 	rw.Header().Set("Content-Type", "text/plain")
+	log.Printf("Get short url %s xxx", ls.GetURL(chi.URLParam(r, "id")))
+
 	rw.Header().Set("Location", ls.GetURL(chi.URLParam(r, "id")))
 	rw.WriteHeader(http.StatusTemporaryRedirect)
 }
