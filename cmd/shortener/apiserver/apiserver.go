@@ -1,8 +1,9 @@
-package api
+package apiserver
 
 import (
 	"fmt"
 	"github.com/KorsakovPV/shortener/cmd/shortener/config"
+	"github.com/KorsakovPV/shortener/cmd/shortener/storage"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"io"
@@ -10,20 +11,15 @@ import (
 	"net/http"
 )
 
-type abstractStorage interface {
-	putURL(string) string
-	getURL(string) string
-}
-
 type localStorage struct{}
 
-func (s *localStorage) putURL(body string) string {
+func (s *localStorage) PutURL(body string) string {
 	id := uuid.New().String()
 	shortURL[id] = body
 	return id
 }
 
-func (s *localStorage) getURL(id string) string {
+func (s *localStorage) GetURL(id string) string {
 	return shortURL[id]
 }
 
@@ -42,8 +38,8 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	var ls abstractStorage = &localStorage{}
-	id := ls.putURL(string(bodyBytes))
+	var ls storage.AbstractStorage = &localStorage{}
+	id := ls.PutURL(string(bodyBytes))
 
 	rw.Header().Set("Content-Type", "text/plain")
 	rw.WriteHeader(http.StatusCreated)
@@ -57,10 +53,10 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 func readShortURL(rw http.ResponseWriter, r *http.Request) {
 	log.Println("Get short url")
 
-	var ls abstractStorage = &localStorage{}
+	var ls storage.AbstractStorage = &localStorage{}
 
 	rw.Header().Set("Content-Type", "text/plain")
-	rw.Header().Set("Location", ls.getURL(chi.URLParam(r, "id")))
+	rw.Header().Set("Location", ls.GetURL(chi.URLParam(r, "id")))
 	rw.WriteHeader(http.StatusTemporaryRedirect)
 }
 
