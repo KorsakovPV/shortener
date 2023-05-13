@@ -17,7 +17,7 @@ func (s *LocalStorageStruct) PutURL(body string) string {
 
 func (s *LocalStorageStruct) GetURL(id string) (string, error) {
 	url, ok := s.ShortURL[id]
-	if ok == false {
+	if !ok {
 		return url, fmt.Errorf("id %s not found", id)
 	} else {
 		return url, nil
