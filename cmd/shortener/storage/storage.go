@@ -1,12 +1,12 @@
 package storage
 
-import "github.com/KorsakovPV/shortener/cmd/shortener/storage/localStorage"
+import "github.com/KorsakovPV/shortener/cmd/shortener/storage/localstorage"
 
 type AbstractStorage interface {
 	PutURL(string) string
 	GetURL(string) string
 }
 
-var LocalStorage AbstractStorage = &localStorage.LocalStorageStruct{
+var LocalStorage AbstractStorage = &localstorage.LocalStorageStruct{
 	ShortURL: map[string]string{},
 }
