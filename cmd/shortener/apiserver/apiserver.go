@@ -5,29 +5,10 @@ import (
 	"github.com/KorsakovPV/shortener/cmd/shortener/config"
 	"github.com/KorsakovPV/shortener/cmd/shortener/storage"
 	"github.com/go-chi/chi/v5"
-	//"github.com/google/uuid"
 	"io"
 	"log"
 	"net/http"
 )
-
-//type localStorage struct {
-//	shortURL map[string]string
-//}
-//
-//func (s *localStorage) PutURL(body string) string {
-//	id := uuid.New().String()
-//	s.shortURL[id] = body
-//	return id
-//}
-//
-//func (s *localStorage) GetURL(id string) string {
-//	return s.shortURL[id]
-//}
-//
-//var ls storage.AbstractStorage = &localStorage{
-//	shortURL: map[string]string{},
-//}
 
 func createShortURL(rw http.ResponseWriter, r *http.Request) {
 	log.Println("Create short url")
