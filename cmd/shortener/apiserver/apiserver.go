@@ -56,7 +56,7 @@ func readShortURL(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusTemporaryRedirect)
 }
 
-func methodNotAllowed(rw http.ResponseWriter, r *http.Request) {
+func methodNotAllowed(rw http.ResponseWriter, _ *http.Request) {
 	log.Println("Method Not Allowed")
 	rw.WriteHeader(http.StatusBadRequest)
 }
