@@ -7,11 +7,6 @@ import (
 	"net/http"
 )
 
-//type AbstractStorage interface {
-//	PutURL(string) string
-//	GetURL(string) string
-//}
-
 func main() {
 
 	config.ParseFlags()
