@@ -5,29 +5,29 @@ import (
 	"github.com/KorsakovPV/shortener/cmd/shortener/config"
 	"github.com/KorsakovPV/shortener/cmd/shortener/storage"
 	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
+	//"github.com/google/uuid"
 	"io"
 	"log"
 	"net/http"
 )
 
-type localStorage struct {
-	shortURL map[string]string
-}
-
-func (s *localStorage) PutURL(body string) string {
-	id := uuid.New().String()
-	s.shortURL[id] = body
-	return id
-}
-
-func (s *localStorage) GetURL(id string) string {
-	return s.shortURL[id]
-}
-
-var ls storage.AbstractStorage = &localStorage{
-	shortURL: map[string]string{},
-}
+//type localStorage struct {
+//	shortURL map[string]string
+//}
+//
+//func (s *localStorage) PutURL(body string) string {
+//	id := uuid.New().String()
+//	s.shortURL[id] = body
+//	return id
+//}
+//
+//func (s *localStorage) GetURL(id string) string {
+//	return s.shortURL[id]
+//}
+//
+//var ls storage.AbstractStorage = &localStorage{
+//	shortURL: map[string]string{},
+//}
 
 func createShortURL(rw http.ResponseWriter, r *http.Request) {
 	log.Println("Create short url")
@@ -37,7 +37,7 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	id := ls.PutURL(string(bodyBytes))
+	id := storage.LocalStorage.PutURL(string(bodyBytes))
 
 	rw.Header().Set("Content-Type", "text/plain")
 	rw.WriteHeader(http.StatusCreated)
@@ -50,9 +50,9 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 
 func readShortURL(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "text/plain")
-	log.Printf("Get short url %s xxx", ls.GetURL(chi.URLParam(r, "id")))
+	log.Printf("Get short url %s xxx", storage.LocalStorage.GetURL(chi.URLParam(r, "id")))
 
-	rw.Header().Set("Location", ls.GetURL(chi.URLParam(r, "id")))
+	rw.Header().Set("Location", storage.LocalStorage.GetURL(chi.URLParam(r, "id")))
 	rw.WriteHeader(http.StatusTemporaryRedirect)
 }
 
