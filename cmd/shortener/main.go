@@ -9,11 +9,13 @@ import (
 
 func main() {
 
-	cfg := config.GetConfig()
+	config.ParseFlags()
+	log.Printf("Shortener start on %s. Default base URL %s.", config.Config.FlagRunAddr, config.Config.FlagBaseURLAddr)
+	err := http.ListenAndServe(config.Config.FlagRunAddr, apiserver.Router())
 
-	log.Printf("Shortener start on %s. Default base URL %s.", cfg.FlagRunAddr, cfg.FlagBaseURLAddr)
-
-	err := http.ListenAndServe(cfg.FlagRunAddr, apiserver.Router())
+	//cfg := config.GetConfig()
+	//log.Printf("Shortener start on %s. Default base URL %s.", cfg.FlagRunAddr, cfg.FlagBaseURLAddr)
+	//err := http.ListenAndServe(cfg.FlagRunAddr, apiserver.Router())
 	if err != nil {
 		log.Fatal(err)
 	}
