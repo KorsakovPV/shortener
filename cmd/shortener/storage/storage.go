@@ -7,10 +7,10 @@ type AbstractStorage interface {
 	GetURL(string) (string, error)
 }
 
-var LocalStorage AbstractStorage = &localstorage.LocalStorageStruct{
+var localStorage AbstractStorage = &localstorage.LocalStorageStruct{
 	ShortURL: map[string]string{},
 }
 
 func GetStorage() AbstractStorage {
-	return LocalStorage
+	return localStorage
 }

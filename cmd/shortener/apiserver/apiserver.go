@@ -20,7 +20,6 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//id := storage.LocalStorage.PutURL(string(bodyBytes))
 	id := storage.GetStorage().PutURL(string(bodyBytes))
 
 	rw.Header().Set("Content-Type", "text/plain")
@@ -35,7 +34,6 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 }
 
 func readShortURL(rw http.ResponseWriter, r *http.Request) {
-	//shortURL, err := storage.LocalStorage.GetURL(chi.URLParam(r, "id"))
 	shortURL, err := storage.GetStorage().GetURL(chi.URLParam(r, "id"))
 
 	if err != nil {
