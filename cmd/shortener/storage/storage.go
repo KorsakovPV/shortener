@@ -10,3 +10,7 @@ type AbstractStorage interface {
 var LocalStorage AbstractStorage = &localstorage.LocalStorageStruct{
 	ShortURL: map[string]string{},
 }
+
+func GetStorage() AbstractStorage {
+	return LocalStorage
+}

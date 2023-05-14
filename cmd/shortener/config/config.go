@@ -12,9 +12,9 @@ type Сonfiguration struct {
 
 var config = &Сonfiguration{}
 
-//func init() {
-//	ParseFlags()
-//}
+func GetConfig() *Сonfiguration {
+	return config
+}
 
 func ParseFlags() {
 	flag.StringVar(&config.FlagRunAddr, "a", "127.0.0.1:8080", "address and port to run server")
@@ -28,8 +28,4 @@ func ParseFlags() {
 	if envBaseURLAddr := os.Getenv("BASE_URL"); envBaseURLAddr != "" {
 		config.FlagBaseURLAddr = envBaseURLAddr
 	}
-}
-
-func GetConfig() *Сonfiguration {
-	return config
 }

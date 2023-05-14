@@ -20,13 +20,13 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := storage.LocalStorage.PutURL(string(bodyBytes))
+	//id := storage.LocalStorage.PutURL(string(bodyBytes))
+	id := storage.GetStorage().PutURL(string(bodyBytes))
 
 	rw.Header().Set("Content-Type", "text/plain")
 	rw.WriteHeader(http.StatusCreated)
 
 	_, err = fmt.Fprintf(rw, "%s/%s", config.GetConfig().FlagBaseURLAddr, id)
-	//_, err = fmt.Fprintf(rw, "%s/%s", config.Config.FlagBaseURLAddr, id)
 	if err != nil {
 		log.Printf("ERROR Can't writing content to HTTP response. %s", err)
 		rw.WriteHeader(http.StatusBadRequest)
@@ -35,7 +35,8 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 }
 
 func readShortURL(rw http.ResponseWriter, r *http.Request) {
-	shortURL, err := storage.LocalStorage.GetURL(chi.URLParam(r, "id"))
+	//shortURL, err := storage.LocalStorage.GetURL(chi.URLParam(r, "id"))
+	shortURL, err := storage.GetStorage().GetURL(chi.URLParam(r, "id"))
 
 	if err != nil {
 		log.Printf("ERROR %s", err)
