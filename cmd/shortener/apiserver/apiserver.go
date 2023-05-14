@@ -25,7 +25,7 @@ func createShortURL(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "text/plain")
 	rw.WriteHeader(http.StatusCreated)
 
-	_, err = fmt.Fprintf(rw, "%s/%s", config.Config.FlagBaseURLAddr, id)
+	_, err = fmt.Fprintf(rw, "%s/%s", config.GetConfig().FlagBaseURLAddr, id)
 	if err != nil {
 		log.Printf("ERROR Can't writing content to HTTP response. %s", err)
 		rw.WriteHeader(http.StatusBadRequest)
