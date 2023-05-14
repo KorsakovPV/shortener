@@ -12,9 +12,9 @@ type Сonfiguration struct {
 
 var Config = &Сonfiguration{}
 
-//func init() {
-//	ParseFlags()
-//}
+func init() {
+	ParseFlags()
+}
 
 func ParseFlags() {
 	flag.StringVar(&Config.FlagRunAddr, "a", "127.0.0.1:8080", "address and port to run server")

@@ -9,7 +9,7 @@ import (
 
 func main() {
 
-	config.ParseFlags()
+	//config.ParseFlags()
 	log.Printf("Shortener start on %s. Default base URL %s.", config.Config.FlagRunAddr, config.Config.FlagBaseURLAddr)
 	err := http.ListenAndServe(config.Config.FlagRunAddr, apiserver.Router())
 
