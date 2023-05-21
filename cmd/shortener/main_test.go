@@ -31,7 +31,7 @@ func TestRouter(t *testing.T) {
 	ts := httptest.NewServer(apiserver.Router())
 	defer ts.Close()
 
-	successBodyRegex := `^http://localhost:8080/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`
+	successBodyRegex := `^http://127.0.0.1:8080/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`
 
 	testCases := []struct {
 		url          string

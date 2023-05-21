@@ -3,62 +3,78 @@ package apiserver
 import (
 	"fmt"
 	"github.com/KorsakovPV/shortener/cmd/shortener/config"
+	"github.com/KorsakovPV/shortener/cmd/shortener/logging"
+	"github.com/KorsakovPV/shortener/cmd/shortener/middleware"
 	"github.com/KorsakovPV/shortener/cmd/shortener/storage"
 	"github.com/go-chi/chi/v5"
 	"io"
-	"log"
 	"net/http"
 )
 
-func createShortURL(rw http.ResponseWriter, r *http.Request) {
-	log.Println("Create short url")
+func createShortURL() http.HandlerFunc {
+	fn := func(rw http.ResponseWriter, r *http.Request) {
+		sugar := logging.GetSugarLogger()
 
-	bodyBytes, err := io.ReadAll(r.Body)
-	if err != nil {
-		log.Printf("ERROR Can't get value from body. %s", err)
-		rw.WriteHeader(http.StatusBadRequest)
-		return
+		sugar.Infoln("Create short url")
+
+		bodyBytes, err := io.ReadAll(r.Body)
+		if err != nil {
+			sugar.Errorf("ERROR Can't get value from body. %s", err)
+			rw.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		id := storage.GetStorage().PutURL(string(bodyBytes))
+
+		rw.Header().Set("Content-Type", "text/plain")
+		rw.WriteHeader(http.StatusCreated)
+
+		_, err = fmt.Fprintf(rw, "%s/%s", config.GetConfig().FlagBaseURLAddr, id)
+		if err != nil {
+			sugar.Errorf("ERROR Can't writing content to HTTP response. %s", err)
+			rw.WriteHeader(http.StatusBadRequest)
+			return
+		}
 	}
-
-	id := storage.GetStorage().PutURL(string(bodyBytes))
-
-	rw.Header().Set("Content-Type", "text/plain")
-	rw.WriteHeader(http.StatusCreated)
-
-	_, err = fmt.Fprintf(rw, "%s/%s", config.GetConfig().FlagBaseURLAddr, id)
-	if err != nil {
-		log.Printf("ERROR Can't writing content to HTTP response. %s", err)
-		rw.WriteHeader(http.StatusBadRequest)
-		return
-	}
+	return http.HandlerFunc(fn)
 }
 
-func readShortURL(rw http.ResponseWriter, r *http.Request) {
-	shortURL, err := storage.GetStorage().GetURL(chi.URLParam(r, "id"))
+func readShortURL() http.HandlerFunc {
+	sugar := logging.GetSugarLogger()
 
-	if err != nil {
-		log.Printf("ERROR %s", err)
-		rw.WriteHeader(http.StatusBadRequest)
-		return
+	fn := func(rw http.ResponseWriter, r *http.Request) {
+		shortURL, err := storage.GetStorage().GetURL(chi.URLParam(r, "id"))
+
+		if err != nil {
+			sugar.Errorf("ERROR %s", err)
+			rw.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		rw.Header().Set("Content-Type", "text/plain")
+		sugar.Infof("Get short url %s", shortURL)
+
+		rw.Header().Set("Location", shortURL)
+		rw.WriteHeader(http.StatusTemporaryRedirect)
 	}
-
-	rw.Header().Set("Content-Type", "text/plain")
-	log.Printf("Get short url %s", shortURL)
-
-	rw.Header().Set("Location", shortURL)
-	rw.WriteHeader(http.StatusTemporaryRedirect)
+	return http.HandlerFunc(fn)
 }
 
-func methodNotAllowed(rw http.ResponseWriter, _ *http.Request) {
-	log.Println("Method Not Allowed")
-	rw.WriteHeader(http.StatusBadRequest)
+func methodNotAllowed() http.HandlerFunc {
+	sugar := logging.GetSugarLogger()
+
+	fn := func(rw http.ResponseWriter, _ *http.Request) {
+		sugar.Errorln("Method Not Allowed")
+		rw.WriteHeader(http.StatusBadRequest)
+	}
+	return http.HandlerFunc(fn)
 }
 
 func Router() chi.Router {
 	r := chi.NewRouter()
 
-	r.Get("/{id}", readShortURL)
-	r.Post("/", createShortURL)
-	r.MethodNotAllowed(methodNotAllowed)
+	r.Post("/", middleware.WithLogging(createShortURL()))
+	r.Get("/{id}", middleware.WithLogging(readShortURL()))
+	r.MethodNotAllowed(middleware.WithLogging(methodNotAllowed()))
 	return r
 }
