@@ -63,7 +63,7 @@ func createShortURLJson() http.HandlerFunc {
 		}
 
 		rw.Header().Set("Content-Type", "application/json")
-		rw.WriteHeader(http.StatusCreated)
+		rw.WriteHeader(http.StatusOK)
 
 		enc := json.NewEncoder(rw)
 		if err := enc.Encode(resp); err != nil {
