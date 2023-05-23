@@ -43,6 +43,7 @@ func createShortURL() http.HandlerFunc {
 }
 
 func createShortURLJson() http.HandlerFunc {
+
 	fn := func(rw http.ResponseWriter, r *http.Request) {
 		sugar := logging.GetSugarLogger()
 
@@ -76,9 +77,10 @@ func createShortURLJson() http.HandlerFunc {
 }
 
 func readShortURL() http.HandlerFunc {
-	sugar := logging.GetSugarLogger()
 
 	fn := func(rw http.ResponseWriter, r *http.Request) {
+		sugar := logging.GetSugarLogger()
+
 		shortURL, err := storage.GetStorage().GetURL(chi.URLParam(r, "id"))
 
 		if err != nil {
@@ -97,9 +99,10 @@ func readShortURL() http.HandlerFunc {
 }
 
 func methodNotAllowed() http.HandlerFunc {
-	sugar := logging.GetSugarLogger()
 
 	fn := func(rw http.ResponseWriter, _ *http.Request) {
+		sugar := logging.GetSugarLogger()
+
 		sugar.Errorln("Method Not Allowed")
 		rw.WriteHeader(http.StatusBadRequest)
 	}
@@ -107,11 +110,13 @@ func methodNotAllowed() http.HandlerFunc {
 }
 
 func Router() chi.Router {
+
 	r := chi.NewRouter()
 
 	r.Post("/api/shorten", middleware.WithLogging(createShortURLJson()))
 	r.Get("/{id}", middleware.WithLogging(readShortURL()))
 	r.Post("/", middleware.WithLogging(createShortURL()))
 	r.MethodNotAllowed(middleware.WithLogging(methodNotAllowed()))
+
 	return r
 }

@@ -45,7 +45,7 @@ func TestRouter(t *testing.T) {
 		{url: `/`, method: http.MethodPut, expectedCode: http.StatusBadRequest, expectedBody: ""},
 		{url: `/`, method: http.MethodPatch, expectedCode: http.StatusBadRequest, expectedBody: ""},
 		{url: `/`, method: http.MethodDelete, expectedCode: http.StatusBadRequest, expectedBody: ""},
-		{url: `/api/shorten`, body: `{"url": "https://practicum.yandex.ru"}`, method: http.MethodPost, expectedCode: http.StatusOK, expectedBody: ""},
+		{url: `/api/shorten`, body: `{"url": "https://practicum.yandex.ru"}`, method: http.MethodPost, expectedCode: http.StatusCreated, expectedBody: ""},
 	}
 
 	for _, tc := range testCases {
