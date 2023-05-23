@@ -109,9 +109,9 @@ func methodNotAllowed() http.HandlerFunc {
 func Router() chi.Router {
 	r := chi.NewRouter()
 
-	r.Post("/", middleware.WithLogging(createShortURL()))
 	r.Post("/api/shorten", middleware.WithLogging(createShortURLJson()))
 	r.Get("/{id}", middleware.WithLogging(readShortURL()))
+	r.Post("/", middleware.WithLogging(createShortURL()))
 	r.MethodNotAllowed(middleware.WithLogging(methodNotAllowed()))
 	return r
 }
