@@ -56,7 +56,7 @@ func createShortURLJson() http.HandlerFunc {
 			return
 		}
 
-		id := storage.GetStorage().PutURL(req.Url)
+		id := storage.GetStorage().PutURL(req.URL)
 
 		resp := models.Response{
 			Result: fmt.Sprintf("%s/%s", config.GetConfig().FlagBaseURLAddr, id),
