@@ -109,14 +109,18 @@ func methodNotAllowed() http.HandlerFunc {
 	return http.HandlerFunc(fn)
 }
 
+func middlewares(h http.HandlerFunc) http.HandlerFunc {
+	return middleware.WithLogging(middleware.GzipMiddleware(h))
+}
+
 func Router() chi.Router {
 
 	r := chi.NewRouter()
 
-	r.Post("/api/shorten", middleware.WithLogging(createShortURLJson()))
-	r.Get("/{id}", middleware.WithLogging(readShortURL()))
-	r.Post("/", middleware.WithLogging(createShortURL()))
-	r.MethodNotAllowed(middleware.WithLogging(methodNotAllowed()))
+	r.Post("/api/shorten", middlewares(createShortURLJson()))
+	r.Get("/{id}", middlewares(readShortURL()))
+	r.Post("/", middlewares(createShortURL()))
+	r.MethodNotAllowed(middlewares(methodNotAllowed()))
 
 	return r
 }
