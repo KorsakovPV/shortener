@@ -37,8 +37,8 @@ func (p *Producer) WriteEvent(event ShortURL) error {
 	return p.encoder.Encode(&event)
 }
 
-func (c *Producer) Close() error {
-	return c.file.Close()
+func (p *Producer) Close() error {
+	return p.file.Close()
 }
 
 // Consumer
@@ -100,6 +100,9 @@ func (s *LocalStorageStruct) PutURL(body string) (string, error) {
 	event := ShortURL{UUID: id, OriginalURL: body}
 
 	_, err = json.Marshal(&event)
+	if err != nil {
+		return "", err
+	}
 
 	if err := Producer.WriteEvent(event); err != nil {
 		return "", err
