@@ -91,21 +91,23 @@ func (s *LocalStorageStruct) PutURL(body string) (string, error) {
 
 	cfg := config.GetConfig()
 
-	Producer, err := NewProducer(cfg.FlagFileStoragePath)
-	if err != nil {
-		return "", err
-	}
-	defer Producer.Close()
+	if cfg.FlagFileStoragePath != "" {
+		Producer, err := NewProducer(cfg.FlagFileStoragePath)
+		if err != nil {
+			return "", err
+		}
+		defer Producer.Close()
 
-	event := ShortURL{UUID: id, OriginalURL: body}
+		event := ShortURL{UUID: id, OriginalURL: body}
 
-	_, err = json.Marshal(&event)
-	if err != nil {
-		return "", err
-	}
+		_, err = json.Marshal(&event)
+		if err != nil {
+			return "", err
+		}
 
-	if err := Producer.WriteEvent(event); err != nil {
-		return "", err
+		if err := Producer.WriteEvent(event); err != nil {
+			return "", err
+		}
 	}
 
 	s.ShortURL[id] = body
