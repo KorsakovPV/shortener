@@ -4,6 +4,7 @@ import (
 	"github.com/KorsakovPV/shortener/cmd/shortener/apiserver"
 	"github.com/KorsakovPV/shortener/cmd/shortener/config"
 	"github.com/KorsakovPV/shortener/cmd/shortener/logging"
+	"github.com/KorsakovPV/shortener/cmd/shortener/storage"
 	"net/http"
 )
 
@@ -17,7 +18,17 @@ func main() {
 		"address", cfg.FlagRunAddr,
 		"Default base URL", cfg.FlagBaseURLAddr,
 	)
+
+	if cfg.FlagFileStoragePath != "" {
+		err := storage.GetStorage().LoadBackupURL()
+		if err != nil {
+			sugar.Errorf("ERROR LoadBackupURL. %s", err)
+			return
+		}
+	}
+
 	err := http.ListenAndServe(cfg.FlagRunAddr, apiserver.Router())
+
 	if err != nil {
 		sugar.Fatalw(err.Error(), "event", "start server")
 	}

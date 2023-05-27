@@ -27,7 +27,12 @@ func createShortURL() http.HandlerFunc {
 			return
 		}
 
-		id := storage.GetStorage().PutURL(string(bodyBytes))
+		id, err := storage.GetStorage().PutURL(string(bodyBytes))
+		if err != nil {
+			sugar.Errorf("ERROR Can't writing content to HTTP response. %s", err)
+			rw.WriteHeader(http.StatusBadRequest)
+			return
+		}
 
 		rw.Header().Set("Content-Type", "text/plain")
 		rw.WriteHeader(http.StatusCreated)
@@ -57,7 +62,12 @@ func createShortURLJson() http.HandlerFunc {
 			return
 		}
 
-		id := storage.GetStorage().PutURL(req.URL)
+		id, err := storage.GetStorage().PutURL(req.URL)
+		if err != nil {
+			sugar.Errorf("ERROR Can't writing content to HTTP response. %s", err)
+			rw.WriteHeader(http.StatusBadRequest)
+			return
+		}
 
 		resp := models.Response{
 			Result: fmt.Sprintf("%s/%s", config.GetConfig().FlagBaseURLAddr, id),
