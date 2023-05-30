@@ -70,12 +70,12 @@ func (c *Consumer) ReadShortURL() (*[]ShortURL, error) {
 		if err != nil {
 			return nil, err
 		}
-		event := ShortURL{}
-		err = json.Unmarshal(data, &event)
+		url := ShortURL{}
+		err = json.Unmarshal(data, &url)
 		if err != nil {
 			return nil, err
 		}
-		*events = append(*events, event)
+		*events = append(*events, url)
 	}
 }
 
@@ -99,14 +99,14 @@ func (s *LocalStorageStruct) PutURL(body string) (string, error) {
 		}
 		defer Producer.Close()
 
-		event := ShortURL{UUID: id, ShortURL: id, OriginalURL: body}
+		url := ShortURL{UUID: id, ShortURL: id, OriginalURL: body}
 
-		_, err = json.Marshal(&event)
+		_, err = json.Marshal(&url)
 		if err != nil {
 			return "", err
 		}
 
-		if err := Producer.WriteEvent(event); err != nil {
+		if err := Producer.WriteEvent(url); err != nil {
 			return "", err
 		}
 	}
