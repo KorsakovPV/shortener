@@ -13,6 +13,7 @@ import (
 
 type ShortURL struct {
 	UUID        string `json:"uuid"`
+	ShortURL    string `json:"short_url"`
 	OriginalURL string `json:"original_url"`
 }
 
@@ -98,7 +99,7 @@ func (s *LocalStorageStruct) PutURL(body string) (string, error) {
 		}
 		defer Producer.Close()
 
-		event := ShortURL{UUID: id, OriginalURL: body}
+		event := ShortURL{UUID: id, ShortURL: id, OriginalURL: body}
 
 		_, err = json.Marshal(&event)
 		if err != nil {
