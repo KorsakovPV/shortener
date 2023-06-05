@@ -17,6 +17,7 @@ func main() {
 		"Starting server",
 		"address", cfg.FlagRunAddr,
 		"Default base URL", cfg.FlagBaseURLAddr,
+		"File for store", cfg.FlagFileStoragePath,
 	)
 
 	if cfg.FlagFileStoragePath != "" {

@@ -31,7 +31,7 @@ func ParseFlags() {
 		config.FlagBaseURLAddr = envBaseURLAddr
 	}
 
-	if envBaseURLAddr := os.Getenv("FILE_STORAGE_PATH"); envBaseURLAddr != "" {
-		config.FlagBaseURLAddr = envBaseURLAddr
+	if envFileStoragePath := os.Getenv("FILE_STORAGE_PATH"); envFileStoragePath != "" {
+		config.FlagFileStoragePath = envFileStoragePath
 	}
 }
