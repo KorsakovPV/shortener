@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/KorsakovPV/shortener/cmd/shortener/apiserver"
+	"github.com/KorsakovPV/shortener/internal/apiserver"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io"

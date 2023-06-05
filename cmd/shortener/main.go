@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/KorsakovPV/shortener/cmd/shortener/apiserver"
 	"github.com/KorsakovPV/shortener/cmd/shortener/config"
 	"github.com/KorsakovPV/shortener/cmd/shortener/logging"
 	"github.com/KorsakovPV/shortener/cmd/shortener/storage"
+	"github.com/KorsakovPV/shortener/internal/apiserver"
 	"net/http"
 )
 
