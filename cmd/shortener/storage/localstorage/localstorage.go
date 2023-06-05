@@ -12,8 +12,7 @@ import (
 )
 
 type ShortURL struct {
-	UUID string `json:"uuid"`
-	//ShortURL    string `json:"short_url"`
+	UUID        string `json:"uuid"`
 	OriginalURL string `json:"original_url"`
 }
 
@@ -93,13 +92,12 @@ func (s *LocalStorageStruct) PutURL(body string) (string, error) {
 	cfg := config.GetConfig()
 
 	if cfg.FlagFileStoragePath != "" {
-		Producer, err := NewProducer(cfg.FlagFileStoragePath)
+		Produc, err := NewProducer(cfg.FlagFileStoragePath)
 		if err != nil {
 			return "", err
 		}
-		defer Producer.Close()
+		defer Produc.Close()
 
-		//url := ShortURL{UUID: id, ShortURL: id, OriginalURL: body}
 		url := ShortURL{UUID: id, OriginalURL: body}
 
 		_, err = json.Marshal(&url)
@@ -107,7 +105,7 @@ func (s *LocalStorageStruct) PutURL(body string) (string, error) {
 			return "", err
 		}
 
-		if err := Producer.WriteEvent(url); err != nil {
+		if err := Produc.WriteEvent(url); err != nil {
 			return "", err
 		}
 	}
@@ -128,13 +126,13 @@ func (s *LocalStorageStruct) GetURL(id string) (string, error) {
 func (s *LocalStorageStruct) LoadBackupURL() error {
 	cfg := config.GetConfig()
 
-	Consumer, err := NewConsumer(cfg.FlagFileStoragePath)
+	Cons, err := NewConsumer(cfg.FlagFileStoragePath)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer Consumer.Close()
+	defer Cons.Close()
 
-	urls, err := Consumer.ReadShortURL()
+	urls, err := Cons.ReadShortURL()
 	if err != nil {
 		return err
 	}
