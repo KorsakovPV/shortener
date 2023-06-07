@@ -4,11 +4,12 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/KorsakovPV/shortener/cmd/shortener/config"
-	"github.com/google/uuid"
 	"io"
 	"log"
 	"os"
+
+	"github.com/KorsakovPV/shortener/cmd/shortener/config"
+	"github.com/google/uuid"
 )
 
 type ShortURL struct {
@@ -59,6 +60,7 @@ func NewConsumer(filename string) (*Consumer, error) {
 	}, nil
 }
 
+// TODO попросили заменить на ]*ShortURL
 func (c *Consumer) ReadShortURL() (*[]ShortURL, error) {
 	events := &[]ShortURL{}
 	for {
@@ -137,6 +139,7 @@ func (s *LocalStorageStruct) LoadBackupURL() error {
 		return err
 	}
 
+	// TODO нужно переделать цикл. скорее всего убрать *
 	for _, url := range *urls {
 		s.ShortURL[url.UUID] = url.OriginalURL
 	}

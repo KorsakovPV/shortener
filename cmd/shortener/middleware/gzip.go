@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/KorsakovPV/shortener/cmd/shortener/gzip"
+	"github.com/KorsakovPV/shortener/internal/gzip"
 	"net/http"
 	"strings"
 )
