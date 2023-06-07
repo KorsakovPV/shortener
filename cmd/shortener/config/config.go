@@ -9,6 +9,7 @@ type Сonfiguration struct {
 	FlagRunAddr         string
 	FlagBaseURLAddr     string
 	FlagFileStoragePath string
+	FlagDataBaseDSN     string
 }
 
 var config = &Сonfiguration{}
@@ -21,6 +22,7 @@ func ParseFlags() {
 	flag.StringVar(&config.FlagRunAddr, "a", "127.0.0.1:8080", "address and port to run server")
 	flag.StringVar(&config.FlagBaseURLAddr, "b", "http://127.0.0.1:8080", "address and port to run server")
 	flag.StringVar(&config.FlagFileStoragePath, "f", "/tmp/short-url-db.json", "address and port to run server")
+	flag.StringVar(&config.FlagDataBaseDSN, "d", "postgres://postgres:postgres@localhost:5432/shortener", "address and port to run server")
 	flag.Parse()
 
 	if envRunAddr := os.Getenv("SERVER_ADDRESS"); envRunAddr != "" {
@@ -33,5 +35,9 @@ func ParseFlags() {
 
 	if envFileStoragePath := os.Getenv("FILE_STORAGE_PATH"); envFileStoragePath != "" {
 		config.FlagFileStoragePath = envFileStoragePath
+	}
+
+	if envDataBaseDSN := os.Getenv("DATABASE_DSN"); envDataBaseDSN != "" {
+		config.FlagDataBaseDSN = envDataBaseDSN
 	}
 }

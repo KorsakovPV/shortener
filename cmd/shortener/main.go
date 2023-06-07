@@ -18,7 +18,31 @@ func main() {
 		"address", cfg.FlagRunAddr,
 		"Default base URL", cfg.FlagBaseURLAddr,
 		"File for store", cfg.FlagFileStoragePath,
+		"DataBase DSN", cfg.FlagDataBaseDSN,
 	)
+
+	//db_storage.Connect()
+
+	//// urlExample := "postgres://username:password@localhost:5432/database_name"
+	//conn, err := pgx.Connect(context.Background(), cfg.FlagDataBaseDSN)
+	//if err != nil {
+	//	sugar.Errorf("Unable to connect to database: %v\n", err)
+	//	os.Exit(1)
+	//}
+	//defer conn.Close(context.Background())
+	//
+	////var name string
+	////var weight int64
+	////var table_catalog string
+	////var table_name string
+	//var number int
+	//err = conn.QueryRow(context.Background(), "select 0").Scan(&number) //, &table_name)
+	//if err != nil {
+	//	fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+	//	os.Exit(1)
+	//}
+	//
+	//fmt.Println(number)
 
 	if cfg.FlagFileStoragePath != "" {
 		err := storage.GetStorage().LoadBackupURL()

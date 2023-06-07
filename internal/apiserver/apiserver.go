@@ -1,17 +1,20 @@
 package apiserver
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/KorsakovPV/shortener/cmd/shortener/config"
 	"github.com/KorsakovPV/shortener/cmd/shortener/logging"
 	"github.com/KorsakovPV/shortener/cmd/shortener/middleware"
 	"github.com/KorsakovPV/shortener/cmd/shortener/storage"
+	"github.com/KorsakovPV/shortener/cmd/shortener/storage/db_storage"
 	"github.com/KorsakovPV/shortener/internal/models"
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 	"io"
 	"net/http"
+	"time"
 )
 
 func createShortURL() http.HandlerFunc {
@@ -43,6 +46,25 @@ func createShortURL() http.HandlerFunc {
 			rw.WriteHeader(http.StatusBadRequest)
 			return
 		}
+	}
+	return http.HandlerFunc(fn)
+}
+
+func pingDB() http.HandlerFunc {
+	fn := func(rw http.ResponseWriter, r *http.Request) {
+		sugar := logging.GetSugarLogger()
+
+		sugar.Infoln("Ping DB.")
+
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		err := db_storage.PingDB(ctx)
+		if err != nil {
+			rw.WriteHeader(http.StatusInternalServerError)
+		} else {
+			rw.WriteHeader(http.StatusOK)
+		}
+
 	}
 	return http.HandlerFunc(fn)
 }
@@ -128,6 +150,7 @@ func Router() chi.Router {
 	r := chi.NewRouter()
 
 	r.Post("/api/shorten", middlewares(createShortURLJson()))
+	r.Get("/ping", middlewares(pingDB()))
 	r.Get("/{id}", middlewares(readShortURL()))
 	r.Post("/", middlewares(createShortURL()))
 	r.MethodNotAllowed(middlewares(methodNotAllowed()))
