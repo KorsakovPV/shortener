@@ -1,11 +1,12 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/KorsakovPV/shortener/cmd/shortener/config"
 	"github.com/KorsakovPV/shortener/cmd/shortener/logging"
 	"github.com/KorsakovPV/shortener/cmd/shortener/storage"
 	"github.com/KorsakovPV/shortener/internal/apiserver"
-	"net/http"
 )
 
 func main() {
@@ -21,7 +22,7 @@ func main() {
 		"DataBase DSN", cfg.FlagDataBaseDSN,
 	)
 
-	//db_storage.Connect()
+	//dbstorage.Connect()
 
 	//// urlExample := "postgres://username:password@localhost:5432/database_name"
 	//conn, err := pgx.Connect(context.Background(), cfg.FlagDataBaseDSN)

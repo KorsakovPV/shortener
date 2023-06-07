@@ -1,7 +1,8 @@
-package db_storage
+package dbstorage
 
 import (
 	"context"
+
 	"github.com/KorsakovPV/shortener/cmd/shortener/config"
 	"github.com/KorsakovPV/shortener/cmd/shortener/logging"
 	"github.com/jackc/pgx/v5"
