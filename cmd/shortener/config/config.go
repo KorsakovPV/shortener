@@ -6,8 +6,9 @@ import (
 )
 
 type Сonfiguration struct {
-	FlagRunAddr     string
-	FlagBaseURLAddr string
+	FlagRunAddr         string
+	FlagBaseURLAddr     string
+	FlagFileStoragePath string
 }
 
 var config = &Сonfiguration{}
@@ -19,6 +20,7 @@ func GetConfig() *Сonfiguration {
 func ParseFlags() {
 	flag.StringVar(&config.FlagRunAddr, "a", "127.0.0.1:8080", "address and port to run server")
 	flag.StringVar(&config.FlagBaseURLAddr, "b", "http://127.0.0.1:8080", "address and port to run server")
+	flag.StringVar(&config.FlagFileStoragePath, "f", "/tmp/short-url-db.json", "address and port to run server")
 	flag.Parse()
 
 	if envRunAddr := os.Getenv("SERVER_ADDRESS"); envRunAddr != "" {
@@ -27,5 +29,9 @@ func ParseFlags() {
 
 	if envBaseURLAddr := os.Getenv("BASE_URL"); envBaseURLAddr != "" {
 		config.FlagBaseURLAddr = envBaseURLAddr
+	}
+
+	if envFileStoragePath := os.Getenv("FILE_STORAGE_PATH"); envFileStoragePath != "" {
+		config.FlagFileStoragePath = envFileStoragePath
 	}
 }

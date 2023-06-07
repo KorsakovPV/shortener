@@ -3,8 +3,9 @@ package storage
 import "github.com/KorsakovPV/shortener/cmd/shortener/storage/localstorage"
 
 type AbstractStorage interface {
-	PutURL(string) string
+	PutURL(string) (string, error)
 	GetURL(string) (string, error)
+	LoadBackupURL() error
 }
 
 var localStorage AbstractStorage = &localstorage.LocalStorageStruct{
