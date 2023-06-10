@@ -79,10 +79,10 @@ import (
 //	return c.file.Close()
 //}
 
-type DbStorageStruct struct {
+type DBStorageStruct struct {
 }
 
-func (s *DbStorageStruct) PutURL(body string) (string, error) {
+func (s *DBStorageStruct) PutURL(body string) (string, error) {
 	id := uuid.New().String()
 
 	//cfg := config.GetConfig()
@@ -110,7 +110,7 @@ func (s *DbStorageStruct) PutURL(body string) (string, error) {
 	return id, nil
 }
 
-func (s *DbStorageStruct) GetURL(id string) (string, error) {
+func (s *DBStorageStruct) GetURL(id string) (string, error) {
 	//url, ok := s.ShortURL[id]
 	//if !ok {
 	//	return url, fmt.Errorf("id %s not found", id)
@@ -120,7 +120,7 @@ func (s *DbStorageStruct) GetURL(id string) (string, error) {
 	return "", nil
 }
 
-func (s *DbStorageStruct) LoadBackupURL() error {
+func (s *DBStorageStruct) LoadBackupURL() error {
 	return fmt.Errorf("method not implemented")
 }
 

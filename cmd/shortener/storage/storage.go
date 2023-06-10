@@ -20,7 +20,7 @@ var localStorage AbstractStorage = &localstorage.LocalStorageStruct{
 	ShortURL: map[string]string{},
 }
 
-var dbStorage AbstractStorage = &dbstorage.DbStorageStruct{
+var dbStorage AbstractStorage = &dbstorage.DBStorageStruct{
 	//ShortURL: map[string]string{},
 }
 
