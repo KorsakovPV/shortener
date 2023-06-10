@@ -3,14 +3,16 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/KorsakovPV/shortener/internal/apiserver"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
 	"testing"
+
+	"github.com/KorsakovPV/shortener/cmd/shortener/storage"
+	"github.com/KorsakovPV/shortener/internal/apiserver"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func testRequest(t *testing.T, ts *httptest.Server, method, path string, jsonBody io.Reader) (*http.Response, string) {
@@ -52,6 +54,7 @@ func TestRouter(t *testing.T) {
 		t.Run(tc.method, func(t *testing.T) {
 			jsonBody := []byte(tc.body)
 			bodyReader := bytes.NewReader(jsonBody)
+			_ = storage.InitStorage()
 			resp, get := testRequest(t, ts, tc.method, tc.url, bodyReader)
 			defer resp.Body.Close()
 
