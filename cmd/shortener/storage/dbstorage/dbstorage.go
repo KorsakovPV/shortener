@@ -1,142 +1,87 @@
 package dbstorage
 
 import (
-	"fmt"
+	"context"
 
+	"github.com/KorsakovPV/shortener/cmd/shortener/config"
+	"github.com/KorsakovPV/shortener/cmd/shortener/logging"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-//type ShortURL struct {
-//	UUID        string `json:"uuid"`
-//	OriginalURL string `json:"original_url"`
-//}
-
-//type Producer struct {
-//	file    *os.File
-//	encoder *json.Encoder
-//}
-//
-//func NewProducer(fileName string) (*Producer, error) {
-//	file, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return &Producer{
-//		file:    file,
-//		encoder: json.NewEncoder(file),
-//	}, nil
-//}
-//
-//func (p *Producer) WriteEvent(event ShortURL) error {
-//	return p.encoder.Encode(&event)
-//}
-//
-//func (p *Producer) Close() error {
-//	return p.file.Close()
-//}
-//
-//// Consumer
-//type Consumer struct {
-//	file   *os.File
-//	reader *bufio.Reader
-//}
-//
-//func NewConsumer(filename string) (*Consumer, error) {
-//	file, err := os.OpenFile(filename, os.O_RDONLY|os.O_CREATE, 0666)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return &Consumer{
-//		file:   file,
-//		reader: bufio.NewReader(file),
-//	}, nil
-//}
-//
-//// TODO попросили заменить на []*ShortURL
-//func (c *Consumer) ReadShortURL() (*[]ShortURL, error) {
-//	events := &[]ShortURL{}
-//	for {
-//		data, _, err := c.reader.ReadLine()
-//		if err == io.EOF {
-//			return events, nil
-//		}
-//		if err != nil {
-//			return nil, err
-//		}
-//		url := ShortURL{}
-//		err = json.Unmarshal(data, &url)
-//		if err != nil {
-//			return nil, err
-//		}
-//		*events = append(*events, url)
-//	}
-//}
-//
-//func (c *Consumer) Close() error {
-//	return c.file.Close()
-//}
-
-type DBStorageStruct struct {
-}
+type DBStorageStruct struct{}
 
 func (s *DBStorageStruct) PutURL(body string) (string, error) {
 	id := uuid.New().String()
 
-	//cfg := config.GetConfig()
-	//
-	//if cfg.FlagFileStoragePath != "" {
-	//	Produc, err := NewProducer(cfg.FlagFileStoragePath)
-	//	if err != nil {
-	//		return "", err
-	//	}
-	//	defer Produc.Close()
-	//
-	//	url := ShortURL{UUID: id, OriginalURL: body}
-	//
-	//	_, err = json.Marshal(&url)
-	//	if err != nil {
-	//		return "", err
-	//	}
-	//
-	//	if err := Produc.WriteEvent(url); err != nil {
-	//		return "", err
-	//	}
-	//}
+	sugar := logging.GetSugarLogger()
+	cfg := config.GetConfig()
+	ctx := context.Background()
 
-	//s.ShortURL[id] = body
+	conn, err := pgx.Connect(ctx, cfg.FlagDataBaseDSN)
+	if err != nil {
+		sugar.Errorf("Unable to connect to database: %v\n", err)
+		return "", err
+	}
+	defer conn.Close(context.Background())
+
+	_, err = conn.Exec(context.Background(), "INSERT INTO public.short_url (id, original_url)VALUES ($1, $2);", id, body)
+	if err != nil {
+		sugar.Errorf("Createuuid extension failed: %v\n", err)
+		return "", err
+	}
+
 	return id, nil
 }
 
 func (s *DBStorageStruct) GetURL(id string) (string, error) {
-	//url, ok := s.ShortURL[id]
-	//if !ok {
-	//	return url, fmt.Errorf("id %s not found", id)
-	//} else {
-	//	return url, nil
-	//}
-	return "", nil
+	sugar := logging.GetSugarLogger()
+	cfg := config.GetConfig()
+	ctx := context.Background()
+
+	conn, err := pgx.Connect(ctx, cfg.FlagDataBaseDSN)
+	if err != nil {
+		sugar.Errorf("Unable to connect to database: %v\n", err)
+		return "", err
+	}
+	defer conn.Close(context.Background())
+
+	var OriginalURL string
+	err = conn.QueryRow(context.Background(), "select original_url from short_url where id=$1", id).Scan(&OriginalURL)
+	if err != nil {
+		sugar.Errorf("QueryRow failed: %v\n", err)
+		return "", err
+	}
+
+	return OriginalURL, nil
 }
 
-func (s *DBStorageStruct) LoadBackupURL() error {
-	return fmt.Errorf("method not implemented")
-}
+func (s *DBStorageStruct) InitStorage() error {
+	sugar := logging.GetSugarLogger()
+	cfg := config.GetConfig()
+	ctx := context.Background()
 
-//func PingDB(ctx context.Context) error {
-//	sugar := logging.GetSugarLogger()
-//	cfg := config.GetConfig()
-//
-//	conn, err := pgx.Connect(context.Background(), cfg.FlagDataBaseDSN)
-//	if err != nil {
-//		sugar.Errorf("Unable to connect to database: %v\n", err)
-//		return err
-//	}
-//	err = conn.Ping(ctx)
-//	if err != nil {
-//		sugar.Errorf("Unable to connect to database: %v\n", err)
-//		return err
-//	}
-//	return nil
-//}
+	conn, err := pgx.Connect(ctx, cfg.FlagDataBaseDSN)
+	if err != nil {
+		sugar.Errorf("Unable to connect to database: %v\n", err)
+		return err
+	}
+	defer conn.Close(context.Background())
+
+	//var name string
+	// Устанавливаем расширение для uuid.
+	_, err = conn.Exec(context.Background(), "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";")
+	if err != nil {
+		sugar.Errorf("Createuuid extension failed: %v\n", err)
+		return err
+	}
+
+	// Создаем таблицу для хранения.
+	_, err = conn.Exec(context.Background(), "CREATE TABLE IF NOT EXISTS short_url (id UUID PRIMARY KEY, original_url TEXT NOT NULL);")
+	if err != nil {
+		sugar.Errorf("Create table failed %v\n", err)
+		return err
+	}
+	return err
+}

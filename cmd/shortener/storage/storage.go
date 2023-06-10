@@ -11,7 +11,7 @@ import (
 type AbstractStorage interface {
 	PutURL(string) (string, error)
 	GetURL(string) (string, error)
-	LoadBackupURL() error
+	InitStorage() error
 }
 
 var storage AbstractStorage
@@ -30,30 +30,34 @@ func InitStorage() error {
 	cfg := config.GetConfig()
 
 	// Если в конфиге есть url для базы, то работаем с базой
-	//if cfg.FlagDataBaseDSN != "" {
-	//	return InitDbStorage(sugar, cfg)
-	//}
+	if cfg.FlagDataBaseDSN != "" {
+		return InitDbStorage(cfg, sugar)
+	}
 
 	// Если в конфиге нет url для базы, то работаем с файлом
 	return InitLocalStorage(cfg, sugar)
 
 }
 
-//func InitDbStorage(sugar zap.SugaredLogger, cfg *config.Сonfiguration) error {
-//	storage = dbStorage
-//	// TODO добавить создание таблиц.
-//	sugar.Infof("Use db storage %s", cfg.FlagDataBaseDSN)
-//	return nil
-//}
+func InitDbStorage(cfg *config.Сonfiguration, sugar zap.SugaredLogger) error {
+	storage = dbStorage
+	err := storage.InitStorage()
+	if err != nil {
+		sugar.Errorf("ERROR Init DB Storage. %s", err)
+		return err
+	}
+	sugar.Infof("Use db storage %s", cfg.FlagDataBaseDSN)
+	return nil
+}
 
 func InitLocalStorage(cfg *config.Сonfiguration, sugar zap.SugaredLogger) error {
 	storage = localStorage
 
 	// Если в конфиге есть имя файла, то загружаем его
 	if cfg.FlagFileStoragePath != "" {
-		err := storage.LoadBackupURL()
+		err := storage.InitStorage()
 		if err != nil {
-			sugar.Errorf("ERROR LoadBackupURL. %s", err)
+			sugar.Errorf("ERROR Init Local Storage. %s", err)
 			return err
 		}
 		sugar.Infof("Use local storage %s", cfg.FlagFileStoragePath)

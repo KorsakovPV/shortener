@@ -126,7 +126,7 @@ func (s *LocalStorageStruct) GetURL(id string) (string, error) {
 	}
 }
 
-func (s *LocalStorageStruct) LoadBackupURL() error {
+func (s *LocalStorageStruct) InitStorage() error {
 	cfg := config.GetConfig()
 
 	Cons, err := NewConsumer(cfg.FlagFileStoragePath)
