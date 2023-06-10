@@ -22,6 +22,8 @@ func main() {
 		"DataBase DSN", cfg.FlagDataBaseDSN,
 	)
 
+	err := storage.InitStorage()
+
 	//dbstorage.Connect()
 
 	//// urlExample := "postgres://username:password@localhost:5432/database_name"
@@ -45,15 +47,16 @@ func main() {
 	//
 	//fmt.Println(number)
 
-	if cfg.FlagFileStoragePath != "" {
-		err := storage.GetStorage().LoadBackupURL()
-		if err != nil {
-			sugar.Errorf("ERROR LoadBackupURL. %s", err)
-			return
-		}
-	}
+	// TODO если переданы параметры БД метод не должен отрабатывать.
+	//if cfg.FlagFileStoragePath != "" {
+	//	err := storage.GetStorage().LoadBackupURL()
+	//	if err != nil {
+	//		sugar.Errorf("ERROR LoadBackupURL. %s", err)
+	//		return
+	//	}
+	//}
 
-	err := http.ListenAndServe(cfg.FlagRunAddr, apiserver.Router())
+	err = http.ListenAndServe(cfg.FlagRunAddr, apiserver.Router())
 
 	if err != nil {
 		sugar.Fatalw(err.Error(), "event", "start server")

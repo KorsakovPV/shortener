@@ -60,7 +60,7 @@ func NewConsumer(filename string) (*Consumer, error) {
 	}, nil
 }
 
-// TODO попросили заменить на ]*ShortURL
+// TODO попросили заменить на []*ShortURL
 func (c *Consumer) ReadShortURL() (*[]ShortURL, error) {
 	events := &[]ShortURL{}
 	for {
@@ -85,6 +85,7 @@ func (c *Consumer) Close() error {
 }
 
 type LocalStorageStruct struct {
+	IsInit   bool
 	ShortURL map[string]string
 }
 

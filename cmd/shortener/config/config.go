@@ -22,6 +22,7 @@ func ParseFlags() {
 	flag.StringVar(&config.FlagRunAddr, "a", "127.0.0.1:8080", "address and port to run server")
 	flag.StringVar(&config.FlagBaseURLAddr, "b", "http://127.0.0.1:8080", "address and port to run server")
 	flag.StringVar(&config.FlagFileStoragePath, "f", "/tmp/short-url-db.json", "address and port to run server")
+	//flag.StringVar(&config.FlagDataBaseDSN, "d", "", "address and port to run server")
 	flag.StringVar(&config.FlagDataBaseDSN, "d", "postgres://postgres:postgres@localhost:5432/shortener", "address and port to run server")
 	flag.Parse()
 

@@ -12,9 +12,9 @@ import (
 	"github.com/KorsakovPV/shortener/cmd/shortener/logging"
 	"github.com/KorsakovPV/shortener/cmd/shortener/middleware"
 	"github.com/KorsakovPV/shortener/cmd/shortener/storage"
-	"github.com/KorsakovPV/shortener/cmd/shortener/storage/dbstorage"
 	"github.com/KorsakovPV/shortener/internal/models"
 	"github.com/go-chi/chi/v5"
+	"github.com/jackc/pgx/v5"
 	"go.uber.org/zap"
 )
 
@@ -52,6 +52,7 @@ func createShortURL() http.HandlerFunc {
 }
 
 func pingDB() http.HandlerFunc {
+	// TODO Переписать функцию чтоб подключение бралось из storeage
 	fn := func(rw http.ResponseWriter, r *http.Request) {
 		sugar := logging.GetSugarLogger()
 
@@ -59,7 +60,8 @@ func pingDB() http.HandlerFunc {
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		err := dbstorage.PingDB(ctx)
+		//err := dbstorage.PingDB(ctx)
+		err := PingDB(ctx)
 		if err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
 		} else {
@@ -68,6 +70,23 @@ func pingDB() http.HandlerFunc {
 
 	}
 	return http.HandlerFunc(fn)
+}
+
+func PingDB(ctx context.Context) error {
+	sugar := logging.GetSugarLogger()
+	cfg := config.GetConfig()
+
+	conn, err := pgx.Connect(context.Background(), cfg.FlagDataBaseDSN)
+	if err != nil {
+		sugar.Errorf("Unable to connect to database: %v\n", err)
+		return err
+	}
+	err = conn.Ping(ctx)
+	if err != nil {
+		sugar.Errorf("Unable to connect to database: %v\n", err)
+		return err
+	}
+	return nil
 }
 
 func createShortURLJson() http.HandlerFunc {
