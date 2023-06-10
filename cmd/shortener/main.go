@@ -19,10 +19,13 @@ func main() {
 		"address", cfg.FlagRunAddr,
 		"Default base URL", cfg.FlagBaseURLAddr,
 		"File for store", cfg.FlagFileStoragePath,
-		"DataBase DSN", cfg.FlagDataBaseDSN,
+		//"DataBase DSN", cfg.FlagDataBaseDSN,
 	)
 
 	err := storage.InitStorage()
+	if err != nil {
+		sugar.Fatalw(err.Error(), "event", "init storage")
+	}
 
 	//dbstorage.Connect()
 

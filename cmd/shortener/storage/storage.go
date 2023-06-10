@@ -30,21 +30,21 @@ func InitStorage() error {
 	cfg := config.GetConfig()
 
 	// Если в конфиге есть url для базы, то работаем с базой
-	if cfg.FlagDataBaseDSN != "" {
-		return InitDbStorage(sugar, cfg)
-	}
+	//if cfg.FlagDataBaseDSN != "" {
+	//	return InitDbStorage(sugar, cfg)
+	//}
 
 	// Если в конфиге нет url для базы, то работаем с файлом
 	return InitLocalStorage(cfg, sugar)
 
 }
 
-func InitDbStorage(sugar zap.SugaredLogger, cfg *config.Сonfiguration) error {
-	storage = dbStorage
-	// TODO добавить создание таблиц.
-	sugar.Infof("Use db storage %s", cfg.FlagDataBaseDSN)
-	return nil
-}
+//func InitDbStorage(sugar zap.SugaredLogger, cfg *config.Сonfiguration) error {
+//	storage = dbStorage
+//	// TODO добавить создание таблиц.
+//	sugar.Infof("Use db storage %s", cfg.FlagDataBaseDSN)
+//	return nil
+//}
 
 func InitLocalStorage(cfg *config.Сonfiguration, sugar zap.SugaredLogger) error {
 	storage = localStorage
