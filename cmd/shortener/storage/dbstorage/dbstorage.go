@@ -5,6 +5,7 @@ import (
 
 	"github.com/KorsakovPV/shortener/cmd/shortener/config"
 	"github.com/KorsakovPV/shortener/cmd/shortener/logging"
+	"github.com/KorsakovPV/shortener/cmd/shortener/storage"
 	"github.com/KorsakovPV/shortener/internal/models"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -32,6 +33,8 @@ func (s *DBStorageStruct) PutURL(body string) (string, error) {
 		sugar.Errorf("Createuuid extension failed: %v\n", err)
 		return "", err
 	}
+
+	storage.GetLocalStorage().PutURL(body)
 
 	return id, nil
 }
@@ -81,6 +84,8 @@ func (s *DBStorageStruct) PutURLBatch(body []models.RequestBatch) ([]models.Resp
 		bodyResponseButch[i].UUID = body[i].UUID
 		bodyResponseButch[i].URL = body[i].URL
 	}
+
+	storage.GetLocalStorage().PutURLBatch(body)
 
 	return bodyResponseButch, nil
 }

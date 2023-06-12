@@ -86,7 +86,6 @@ func (c *Consumer) Close() error {
 }
 
 type LocalStorageStruct struct {
-	IsInit   bool
 	ShortURL map[string]string
 }
 

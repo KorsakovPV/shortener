@@ -31,14 +31,20 @@ func InitStorage() error {
 
 	cfg := config.GetConfig()
 
-	// Если в конфиге есть url для базы, то работаем с базой
-	if cfg.FlagDataBaseDSN != "" {
-		return InitDBStorage(cfg, sugar)
+	// Если в конфиге нет url для базы, то работаем с файлом
+	err := InitLocalStorage(cfg, sugar)
+	if err != nil {
+		return err
 	}
 
-	// Если в конфиге нет url для базы, то работаем с файлом
-	return InitLocalStorage(cfg, sugar)
-
+	// Если в конфиге есть url для базы, то работаем с базой
+	if cfg.FlagDataBaseDSN != "" {
+		err := InitDBStorage(cfg, sugar)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func InitDBStorage(cfg *config.Сonfiguration, sugar zap.SugaredLogger) error {
@@ -73,4 +79,8 @@ func InitLocalStorage(cfg *config.Сonfiguration, sugar zap.SugaredLogger) error
 
 func GetStorage() AbstractStorage {
 	return storage
+}
+
+func GetLocalStorage() AbstractStorage {
+	return localStorage
 }
