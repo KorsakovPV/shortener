@@ -14,5 +14,13 @@ type RequestBatch struct {
 }
 
 type ResponseButch struct {
-	Result string `json:"result"`
+	UUID string `json:"correlation_id"`
+	URL  string `json:"short_url"`
+}
+
+type Employee struct {
+	Name   string
+	Age    int
+	Salary int
+	UUID   string
 }

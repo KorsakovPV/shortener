@@ -5,12 +5,14 @@ import (
 	"github.com/KorsakovPV/shortener/cmd/shortener/logging"
 	"github.com/KorsakovPV/shortener/cmd/shortener/storage/dbstorage"
 	"github.com/KorsakovPV/shortener/cmd/shortener/storage/localstorage"
+	"github.com/KorsakovPV/shortener/internal/models"
 	"go.uber.org/zap"
 )
 
 type AbstractStorage interface {
 	PutURL(string) (string, error)
 	GetURL(string) (string, error)
+	PutURLBatch([]models.RequestBatch) ([]models.ResponseButch, error)
 	InitStorage() error
 }
 

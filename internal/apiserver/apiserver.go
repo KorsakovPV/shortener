@@ -129,24 +129,12 @@ func createShortURLJson() http.HandlerFunc {
 }
 
 func createShortURLBatchJson() http.HandlerFunc {
-
-	//[
-	//	{
-	//	"correlation_id": "11111",
-	//	"original_url": "https://practicum.yandex.ru"
-	//	},
-	//	{
-	//	"correlation_id": "22222",
-	//	"original_url": "https://practicum.yandex.ru2"
-	//	}
-	//]
-
 	fn := func(rw http.ResponseWriter, r *http.Request) {
 		sugar := logging.GetSugarLogger()
 
 		sugar.Infoln("Create short url")
 
-		var req models.Request
+		var req []models.RequestBatch
 		dec := json.NewDecoder(r.Body)
 		if err := dec.Decode(&req); err != nil {
 			sugar.Debug("cannot decode request JSON body", zap.Error(err))
@@ -154,16 +142,13 @@ func createShortURLBatchJson() http.HandlerFunc {
 			return
 		}
 
-		id, err := storage.GetStorage().PutURL(req.URL)
+		bodyResponseButch, err := storage.GetStorage().PutURLBatch(req)
 		if err != nil {
 			sugar.Errorf("ERROR Can't writing content to HTTP response. %s", err)
 			rw.WriteHeader(http.StatusBadRequest)
 			return
 		}
-
-		resp := models.Response{
-			Result: fmt.Sprintf("%s/%s", config.GetConfig().FlagBaseURLAddr, id),
-		}
+		resp := bodyResponseButch
 
 		rw.Header().Set("Content-Type", "application/json")
 		rw.WriteHeader(http.StatusCreated)
@@ -173,7 +158,6 @@ func createShortURLBatchJson() http.HandlerFunc {
 			sugar.Debug("error encoding response", zap.Error(err))
 			return
 		}
-
 	}
 	return http.HandlerFunc(fn)
 }

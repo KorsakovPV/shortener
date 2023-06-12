@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/KorsakovPV/shortener/cmd/shortener/config"
+	"github.com/KorsakovPV/shortener/internal/models"
 	"github.com/google/uuid"
 )
 
@@ -115,6 +116,50 @@ func (s *LocalStorageStruct) PutURL(body string) (string, error) {
 
 	s.ShortURL[id] = body
 	return id, nil
+}
+
+func (s *LocalStorageStruct) PutURLBatch(body []models.RequestBatch) ([]models.ResponseButch, error) {
+	cfg := config.GetConfig()
+
+	bodyResponseButch := make([]models.ResponseButch, len(body))
+	urls := make([]ShortURL, len(body))
+
+	for i := 0; i < len(body); i++ {
+		id := body[i].UUID
+		url := body[i].URL
+
+		_, ok := s.ShortURL[id]
+		if ok == true {
+			return nil, fmt.Errorf("id %s is exist", id)
+		}
+		bodyResponseButch[i].UUID = id
+		bodyResponseButch[i].URL = url
+		urls[i].UUID = id
+		urls[i].OriginalURL = url
+	}
+
+	if cfg.FlagFileStoragePath != "" {
+		Produc, err := NewProducer(cfg.FlagFileStoragePath)
+		if err != nil {
+			return nil, err
+		}
+		defer Produc.Close()
+
+		_, err = json.Marshal(&urls)
+		if err != nil {
+			return nil, err
+		}
+
+		for i := 0; i < len(body); i++ {
+
+			//if err := Produc.WriteEvent(urls[i]); err != nil {
+			//	return nil, err
+			//}
+			s.ShortURL[urls[i].UUID] = urls[i].OriginalURL
+		}
+	}
+
+	return bodyResponseButch, nil
 }
 
 func (s *LocalStorageStruct) GetURL(id string) (string, error) {

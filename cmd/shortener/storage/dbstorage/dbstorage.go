@@ -5,6 +5,7 @@ import (
 
 	"github.com/KorsakovPV/shortener/cmd/shortener/config"
 	"github.com/KorsakovPV/shortener/cmd/shortener/logging"
+	"github.com/KorsakovPV/shortener/internal/models"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -33,6 +34,52 @@ func (s *DBStorageStruct) PutURL(body string) (string, error) {
 	}
 
 	return id, nil
+}
+
+func (s *DBStorageStruct) PutURLBatch(body []models.RequestBatch) ([]models.ResponseButch, error) {
+	bodyResponseButch := make([]models.ResponseButch, len(body))
+	// начинаем транзакцию
+	sugar := logging.GetSugarLogger()
+	cfg := config.GetConfig()
+	ctx := context.Background()
+
+	conn, err := pgx.Connect(ctx, cfg.FlagDataBaseDSN)
+	if err != nil {
+		sugar.Errorf("Unable to connect to database: %v\n", err)
+		return nil, err
+	}
+	defer func(conn *pgx.Conn, ctx context.Context) {
+		err := conn.Close(ctx)
+		if err != nil {
+			sugar.Errorf("Error %s", err)
+		}
+	}(conn, context.Background())
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for i := 0; i < len(body); i++ {
+		// все изменения записываются в транзакцию
+		_, err = tx.Exec(ctx,
+			"INSERT INTO short_url (id, original_url) VALUES($1, $2)", body[i].UUID, body[i].URL)
+		if err != nil {
+			// если ошибка, то откатываем изменения
+			err := tx.Rollback(ctx)
+			if err != nil {
+				return nil, err
+			}
+			return nil, err
+		}
+	}
+	// завершаем транзакцию
+	tx.Commit(ctx)
+
+	for i := 0; i < len(body); i++ {
+		bodyResponseButch[i].UUID = body[i].UUID
+		bodyResponseButch[i].URL = body[i].URL
+	}
+
+	return bodyResponseButch, nil
 }
 
 func (s *DBStorageStruct) GetURL(id string) (string, error) {
