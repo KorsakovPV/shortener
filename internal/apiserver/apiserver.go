@@ -128,6 +128,56 @@ func createShortURLJson() http.HandlerFunc {
 	return http.HandlerFunc(fn)
 }
 
+func createShortURLBatchJson() http.HandlerFunc {
+
+	//[
+	//	{
+	//	"correlation_id": "11111",
+	//	"original_url": "https://practicum.yandex.ru"
+	//	},
+	//	{
+	//	"correlation_id": "22222",
+	//	"original_url": "https://practicum.yandex.ru2"
+	//	}
+	//]
+
+	fn := func(rw http.ResponseWriter, r *http.Request) {
+		sugar := logging.GetSugarLogger()
+
+		sugar.Infoln("Create short url")
+
+		var req models.Request
+		dec := json.NewDecoder(r.Body)
+		if err := dec.Decode(&req); err != nil {
+			sugar.Debug("cannot decode request JSON body", zap.Error(err))
+			rw.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		id, err := storage.GetStorage().PutURL(req.URL)
+		if err != nil {
+			sugar.Errorf("ERROR Can't writing content to HTTP response. %s", err)
+			rw.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		resp := models.Response{
+			Result: fmt.Sprintf("%s/%s", config.GetConfig().FlagBaseURLAddr, id),
+		}
+
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusCreated)
+
+		enc := json.NewEncoder(rw)
+		if err := enc.Encode(resp); err != nil {
+			sugar.Debug("error encoding response", zap.Error(err))
+			return
+		}
+
+	}
+	return http.HandlerFunc(fn)
+}
+
 func readShortURL() http.HandlerFunc {
 
 	fn := func(rw http.ResponseWriter, r *http.Request) {
@@ -170,6 +220,7 @@ func Router() chi.Router {
 	r := chi.NewRouter()
 
 	r.Post("/api/shorten", middlewares(createShortURLJson()))
+	r.Post("/api/shorten/batch", middlewares(createShortURLBatchJson()))
 	r.Get("/ping", middlewares(pingDB()))
 	r.Get("/{id}", middlewares(readShortURL()))
 	r.Post("/", middlewares(createShortURL()))
