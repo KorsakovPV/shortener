@@ -72,7 +72,10 @@ func (s *DBStorageStruct) PutURLBatch(body []models.RequestBatch) ([]models.Resp
 		}
 	}
 	// завершаем транзакцию
-	tx.Commit(ctx)
+	err = tx.Commit(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	for i := 0; i < len(body); i++ {
 		bodyResponseButch[i].UUID = body[i].UUID
