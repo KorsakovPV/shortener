@@ -129,7 +129,7 @@ func (s *LocalStorageStruct) PutURLBatch(body []models.RequestBatch) ([]models.R
 		url := body[i].URL
 
 		_, ok := s.ShortURL[id]
-		if ok == true {
+		if ok {
 			return nil, fmt.Errorf("id %s is exist", id)
 		}
 		bodyResponseButch[i].UUID = id
