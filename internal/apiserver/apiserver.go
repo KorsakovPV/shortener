@@ -128,7 +128,7 @@ func createShortURLJson() http.HandlerFunc {
 	return http.HandlerFunc(fn)
 }
 
-func createShortURLBatchJson() http.HandlerFunc {
+func createShortURLBatchJSON() http.HandlerFunc {
 	fn := func(rw http.ResponseWriter, r *http.Request) {
 		sugar := logging.GetSugarLogger()
 
@@ -204,7 +204,7 @@ func Router() chi.Router {
 	r := chi.NewRouter()
 
 	r.Post("/api/shorten", middlewares(createShortURLJson()))
-	r.Post("/api/shorten/batch", middlewares(createShortURLBatchJson()))
+	r.Post("/api/shorten/batch", middlewares(createShortURLBatchJSON()))
 	r.Get("/ping", middlewares(pingDB()))
 	r.Get("/{id}", middlewares(readShortURL()))
 	r.Post("/", middlewares(createShortURL()))
