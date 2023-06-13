@@ -34,7 +34,7 @@ func createShortURL() http.HandlerFunc {
 
 		id := uuid.New().String()
 
-		_, err = storage.GetStorage().PutURL(id, string(bodyBytes))
+		_, err = storage.GetStorage().PutURL(id, string(bodyBytes)) //
 		if err != nil {
 			sugar.Errorf("ERROR Can't writing content to HTTP response. %s", err)
 			rw.WriteHeader(http.StatusBadRequest)
@@ -213,11 +213,11 @@ func Router() chi.Router {
 
 	r := chi.NewRouter()
 
-	r.Post("/api/shorten", middlewares(createShortURLJson()))
+	r.Post("/api/shorten", middlewares(createShortURLJson())) //
 	r.Post("/api/shorten/batch", middlewares(createShortURLBatchJSON()))
 	r.Get("/ping", middlewares(pingDB()))
 	r.Get("/{id}", middlewares(readShortURL()))
-	r.Post("/", middlewares(createShortURL()))
+	r.Post("/", middlewares(createShortURL())) //
 	r.MethodNotAllowed(middlewares(methodNotAllowed()))
 
 	return r
