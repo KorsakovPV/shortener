@@ -36,7 +36,7 @@ func createShortURL() http.HandlerFunc {
 
 		id := uuid.New().String()
 
-		id, err = storage.GetStorage().PutURL(id, string(bodyBytes)) //
+		id, err = storage.GetStorage().PutURL(id, string(bodyBytes))
 
 		switch {
 		case errors.Is(err, dbstorage.ErrConflict):

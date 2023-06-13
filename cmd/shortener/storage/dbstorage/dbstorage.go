@@ -76,7 +76,6 @@ func (s *DBStorageStruct) PutURLBatch(body []models.RequestBatch) ([]models.Resp
 		_, err = tx.Exec(ctx,
 			"INSERT INTO short_url (id, original_url) VALUES($1, $2)", body[i].UUID, body[i].URL)
 		if err != nil {
-			// если ошибка, то откатываем изменения
 			err := tx.Rollback(ctx)
 			if err != nil {
 				return nil, err
