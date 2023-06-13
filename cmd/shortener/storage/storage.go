@@ -92,18 +92,19 @@ func InitStorage() error {
 
 	cfg := config.GetConfig()
 
-	// Если в конфиге нет url для базы, то работаем с файлом
-	err := InitLocalStorage(cfg, sugar)
-	if err != nil {
-		return err
-	}
-
 	// Если в конфиге есть url для базы, то работаем с базой
 	if cfg.FlagDataBaseDSN != "" {
 		err := InitDBStorage(cfg, sugar)
 		if err != nil {
 			return err
 		}
+		return nil
+	}
+
+	// Если в конфиге нет url для базы, то работаем с файлом
+	err := InitLocalStorage(cfg, sugar)
+	if err != nil {
+		return err
 	}
 	return nil
 }
