@@ -58,17 +58,19 @@ func (s Struct) GetURL(id string) (string, error) {
 func (s Struct) PutURLBatch(body []models.RequestBatch) ([]models.ResponseButch, error) {
 	cfg := config.GetConfig()
 
+	if cfg.FlagDataBaseDSN != "" {
+		bodyResponseButch, err := dbStorage.PutURLBatch(body)
+		if err != nil {
+			return nil, err
+		}
+		return bodyResponseButch, nil
+	}
+
 	bodyResponseButch, err := localStorage.PutURLBatch(body)
 	if err != nil {
 		return nil, err
 	}
 
-	if cfg.FlagDataBaseDSN != "" {
-		_, err := dbStorage.PutURLBatch(body)
-		if err != nil {
-			return nil, err
-		}
-	}
 	return bodyResponseButch, nil
 }
 
