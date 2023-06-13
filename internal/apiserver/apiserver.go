@@ -58,18 +58,6 @@ func createShortURL() http.HandlerFunc {
 			}
 		}
 
-		//if errors.Is(err, dbstorage.ErrConflict) {
-		//	fmt.Println(err)
-		//}
-		//if err != nil {
-		//	sugar.Errorf("ERROR Can't writing content to HTTP response. %s", err)
-		//	rw.WriteHeader(http.StatusBadRequest)
-		//	return
-		//}
-
-		//rw.Header().Set("Content-Type", "text/plain")
-		//rw.WriteHeader(http.StatusCreated)
-
 		_, err = fmt.Fprintf(rw, "%s/%s", config.GetConfig().FlagBaseURLAddr, id)
 		if err != nil {
 			sugar.Errorf("ERROR Can't writing content to HTTP response. %s", err)
@@ -160,21 +148,6 @@ func createShortURLJson() http.HandlerFunc {
 				rw.WriteHeader(http.StatusCreated)
 			}
 		}
-		//if errors.Is(err, dbstorage.ErrConflict) {
-		//	fmt.Println(err)
-		//}
-		//if err != nil {
-		//	sugar.Errorf("ERROR Can't writing content to HTTP response. %s", err)
-		//	rw.WriteHeader(http.StatusBadRequest)
-		//	return
-		//}
-
-		//resp := models.Response{
-		//	Result: fmt.Sprintf("%s/%s", config.GetConfig().FlagBaseURLAddr, id),
-		//}
-
-		//rw.Header().Set("Content-Type", "application/json")
-		//rw.WriteHeader(http.StatusCreated)
 
 		enc := json.NewEncoder(rw)
 		if err := enc.Encode(resp); err != nil {
@@ -267,11 +240,11 @@ func Router() chi.Router {
 
 	r := chi.NewRouter()
 
-	r.Post("/api/shorten", middlewares(createShortURLJson())) //
+	r.Post("/api/shorten", middlewares(createShortURLJson()))
 	r.Post("/api/shorten/batch", middlewares(createShortURLBatchJSON()))
 	r.Get("/ping", middlewares(pingDB()))
 	r.Get("/{id}", middlewares(readShortURL()))
-	r.Post("/", middlewares(createShortURL())) //
+	r.Post("/", middlewares(createShortURL()))
 	r.MethodNotAllowed(middlewares(methodNotAllowed()))
 
 	return r

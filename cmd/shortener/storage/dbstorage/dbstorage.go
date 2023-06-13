@@ -50,14 +50,6 @@ func (s *DBStorageStruct) PutURL(id string, body string) (string, error) {
 		}
 	}
 
-	//if errors.Is(err, ErrAccessDenied) {
-	//}
-
-	//if err != nil {
-	//	sugar.Errorf("Createuuid extension failed: %v\n", err)
-	//	return "", err
-	//}
-
 	return id, nil
 }
 
