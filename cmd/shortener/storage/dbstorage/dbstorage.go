@@ -2,14 +2,20 @@ package dbstorage
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/KorsakovPV/shortener/cmd/shortener/config"
 	"github.com/KorsakovPV/shortener/cmd/shortener/logging"
 	"github.com/KorsakovPV/shortener/internal/models"
+	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
+
+// ErrConflict указывает на конфликт данных в хранилище.
+var ErrConflict = errors.New("data conflict")
 
 type DBStorageStruct struct{}
 
@@ -24,13 +30,33 @@ func (s *DBStorageStruct) PutURL(id string, body string) (string, error) {
 		sugar.Errorf("Unable to connect to database: %v\n", err)
 		return "", err
 	}
-	defer conn.Close(context.Background())
+	defer conn.Close(ctx)
 
-	_, err = conn.Exec(context.Background(), "INSERT INTO public.short_url (id, original_url)VALUES ($1, $2);", id, body)
+	_, err = conn.Exec(ctx, "INSERT INTO public.short_url (id, original_url)VALUES ($1, $2);", id, body)
+
 	if err != nil {
-		sugar.Errorf("Createuuid extension failed: %v\n", err)
-		return "", err
+		// проверяем, что ошибка сигнализирует о потенциальном нарушении целостности данных
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
+			err = ErrConflict
+
+			var id string
+			errSelect := conn.QueryRow(context.Background(), "select id from short_url where original_url=$1", body).Scan(&id)
+			if errSelect != nil {
+				sugar.Errorf("QueryRow failed: %v\n", err)
+				return "", errSelect
+			}
+			return id, err
+		}
 	}
+
+	//if errors.Is(err, ErrAccessDenied) {
+	//}
+
+	//if err != nil {
+	//	sugar.Errorf("Createuuid extension failed: %v\n", err)
+	//	return "", err
+	//}
 
 	return id, nil
 }

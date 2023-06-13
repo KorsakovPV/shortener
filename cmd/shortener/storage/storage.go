@@ -22,11 +22,11 @@ func (s Struct) PutURL(id string, body string) (string, error) {
 	cfg := config.GetConfig()
 
 	if cfg.FlagDataBaseDSN != "" {
-		_, err := dbStorage.PutURL(id, body)
-		if err != nil {
-			return "", err
-		}
-		return id, nil
+		id, err := dbStorage.PutURL(id, body)
+		//if err != nil {
+		//	return "", err
+		//}
+		return id, err
 	}
 
 	_, err := localStorage.PutURL(id, body)

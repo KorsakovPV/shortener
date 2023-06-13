@@ -3,6 +3,7 @@ package apiserver
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	"github.com/KorsakovPV/shortener/cmd/shortener/logging"
 	"github.com/KorsakovPV/shortener/cmd/shortener/middleware"
 	"github.com/KorsakovPV/shortener/cmd/shortener/storage"
+	"github.com/KorsakovPV/shortener/cmd/shortener/storage/dbstorage"
 	"github.com/KorsakovPV/shortener/internal/models"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -34,15 +36,39 @@ func createShortURL() http.HandlerFunc {
 
 		id := uuid.New().String()
 
-		_, err = storage.GetStorage().PutURL(id, string(bodyBytes)) //
-		if err != nil {
-			sugar.Errorf("ERROR Can't writing content to HTTP response. %s", err)
-			rw.WriteHeader(http.StatusBadRequest)
-			return
+		id, err = storage.GetStorage().PutURL(id, string(bodyBytes)) //
+
+		switch {
+		case errors.Is(err, dbstorage.ErrConflict):
+			{
+				rw.Header().Set("Content-Type", "text/plain")
+				rw.WriteHeader(http.StatusConflict)
+				//rw.WriteHeader(http.StatusCreated)
+			}
+		case err != nil:
+			{
+				sugar.Errorf("ERROR Can't writing content to HTTP response. %s", err)
+				rw.WriteHeader(http.StatusBadRequest)
+				return
+			}
+		default:
+			{
+				rw.Header().Set("Content-Type", "text/plain")
+				rw.WriteHeader(http.StatusCreated)
+			}
 		}
 
-		rw.Header().Set("Content-Type", "text/plain")
-		rw.WriteHeader(http.StatusCreated)
+		//if errors.Is(err, dbstorage.ErrConflict) {
+		//	fmt.Println(err)
+		//}
+		//if err != nil {
+		//	sugar.Errorf("ERROR Can't writing content to HTTP response. %s", err)
+		//	rw.WriteHeader(http.StatusBadRequest)
+		//	return
+		//}
+
+		//rw.Header().Set("Content-Type", "text/plain")
+		//rw.WriteHeader(http.StatusCreated)
 
 		_, err = fmt.Fprintf(rw, "%s/%s", config.GetConfig().FlagBaseURLAddr, id)
 		if err != nil {
@@ -109,19 +135,46 @@ func createShortURLJson() http.HandlerFunc {
 
 		id := uuid.New().String()
 
-		_, err := storage.GetStorage().PutURL(id, req.URL)
-		if err != nil {
-			sugar.Errorf("ERROR Can't writing content to HTTP response. %s", err)
-			rw.WriteHeader(http.StatusBadRequest)
-			return
-		}
+		id, err := storage.GetStorage().PutURL(id, req.URL)
 
 		resp := models.Response{
 			Result: fmt.Sprintf("%s/%s", config.GetConfig().FlagBaseURLAddr, id),
 		}
 
-		rw.Header().Set("Content-Type", "application/json")
-		rw.WriteHeader(http.StatusCreated)
+		switch {
+		case errors.Is(err, dbstorage.ErrConflict):
+			{
+				rw.Header().Set("Content-Type", "application/json")
+				rw.WriteHeader(http.StatusConflict)
+				//rw.WriteHeader(http.StatusCreated)
+			}
+		case err != nil:
+			{
+				sugar.Errorf("ERROR Can't writing content to HTTP response. %s", err)
+				rw.WriteHeader(http.StatusBadRequest)
+				return
+			}
+		default:
+			{
+				rw.Header().Set("Content-Type", "application/json")
+				rw.WriteHeader(http.StatusCreated)
+			}
+		}
+		//if errors.Is(err, dbstorage.ErrConflict) {
+		//	fmt.Println(err)
+		//}
+		//if err != nil {
+		//	sugar.Errorf("ERROR Can't writing content to HTTP response. %s", err)
+		//	rw.WriteHeader(http.StatusBadRequest)
+		//	return
+		//}
+
+		//resp := models.Response{
+		//	Result: fmt.Sprintf("%s/%s", config.GetConfig().FlagBaseURLAddr, id),
+		//}
+
+		//rw.Header().Set("Content-Type", "application/json")
+		//rw.WriteHeader(http.StatusCreated)
 
 		enc := json.NewEncoder(rw)
 		if err := enc.Encode(resp); err != nil {
@@ -207,6 +260,7 @@ func methodNotAllowed() http.HandlerFunc {
 
 func middlewares(h http.HandlerFunc) http.HandlerFunc {
 	return middleware.WithLogging(middleware.GzipMiddleware(h))
+	//return middleware.WithLogging(h)
 }
 
 func Router() chi.Router {
