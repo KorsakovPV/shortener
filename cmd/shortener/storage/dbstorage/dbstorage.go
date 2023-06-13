@@ -14,7 +14,6 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-// ErrConflict указывает на конфликт данных в хранилище.
 var ErrConflict = errors.New("data conflict")
 
 type DBStorageStruct struct{}
@@ -35,7 +34,6 @@ func (s *DBStorageStruct) PutURL(id string, body string) (string, error) {
 	_, err = conn.Exec(ctx, "INSERT INTO public.short_url (id, original_url)VALUES ($1, $2);", id, body)
 
 	if err != nil {
-		// проверяем, что ошибка сигнализирует о потенциальном нарушении целостности данных
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
 			err = ErrConflict
@@ -55,7 +53,6 @@ func (s *DBStorageStruct) PutURL(id string, body string) (string, error) {
 
 func (s *DBStorageStruct) PutURLBatch(body []models.RequestBatch) ([]models.ResponseButch, error) {
 	bodyResponseButch := make([]models.ResponseButch, len(body))
-	// начинаем транзакцию
 	sugar := logging.GetSugarLogger()
 	cfg := config.GetConfig()
 	ctx := context.Background()
@@ -76,7 +73,6 @@ func (s *DBStorageStruct) PutURLBatch(body []models.RequestBatch) ([]models.Resp
 		return nil, err
 	}
 	for i := 0; i < len(body); i++ {
-		// все изменения записываются в транзакцию
 		_, err = tx.Exec(ctx,
 			"INSERT INTO short_url (id, original_url) VALUES($1, $2)", body[i].UUID, body[i].URL)
 		if err != nil {
@@ -88,7 +84,6 @@ func (s *DBStorageStruct) PutURLBatch(body []models.RequestBatch) ([]models.Resp
 			return nil, err
 		}
 	}
-	// завершаем транзакцию
 	err = tx.Commit(ctx)
 	if err != nil {
 		return nil, err
@@ -136,7 +131,6 @@ func (s *DBStorageStruct) InitStorage() error {
 	}
 	defer conn.Close(context.Background())
 
-	//var name string
 	// Устанавливаем расширение для uuid.
 	_, err = conn.Exec(context.Background(), "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";")
 	if err != nil {

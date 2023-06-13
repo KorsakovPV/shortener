@@ -43,7 +43,6 @@ func createShortURL() http.HandlerFunc {
 			{
 				rw.Header().Set("Content-Type", "text/plain")
 				rw.WriteHeader(http.StatusConflict)
-				//rw.WriteHeader(http.StatusCreated)
 			}
 		case err != nil:
 			{
@@ -134,7 +133,6 @@ func createShortURLJson() http.HandlerFunc {
 			{
 				rw.Header().Set("Content-Type", "application/json")
 				rw.WriteHeader(http.StatusConflict)
-				//rw.WriteHeader(http.StatusCreated)
 			}
 		case err != nil:
 			{
@@ -233,7 +231,6 @@ func methodNotAllowed() http.HandlerFunc {
 
 func middlewares(h http.HandlerFunc) http.HandlerFunc {
 	return middleware.WithLogging(middleware.GzipMiddleware(h))
-	//return middleware.WithLogging(h)
 }
 
 func Router() chi.Router {
