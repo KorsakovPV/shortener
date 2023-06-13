@@ -10,7 +10,6 @@ import (
 
 	"github.com/KorsakovPV/shortener/cmd/shortener/config"
 	"github.com/KorsakovPV/shortener/internal/models"
-	"github.com/google/uuid"
 )
 
 type ShortURL struct {
@@ -89,8 +88,7 @@ type LocalStorageStruct struct {
 	ShortURL map[string]string
 }
 
-func (s *LocalStorageStruct) PutURL(body string) (string, error) {
-	id := uuid.New().String()
+func (s *LocalStorageStruct) PutURL(id string, body string) (string, error) {
 
 	cfg := config.GetConfig()
 
@@ -151,9 +149,9 @@ func (s *LocalStorageStruct) PutURLBatch(body []models.RequestBatch) ([]models.R
 
 		for i := 0; i < len(body); i++ {
 
-			//if err := Produc.WriteEvent(urls[i]); err != nil {
-			//	return nil, err
-			//}
+			if err := Produc.WriteEvent(urls[i]); err != nil {
+				return nil, err
+			}
 			s.ShortURL[urls[i].UUID] = urls[i].OriginalURL
 		}
 	}

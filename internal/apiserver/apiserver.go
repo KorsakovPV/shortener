@@ -14,6 +14,7 @@ import (
 	"github.com/KorsakovPV/shortener/cmd/shortener/storage"
 	"github.com/KorsakovPV/shortener/internal/models"
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"go.uber.org/zap"
 )
@@ -31,7 +32,9 @@ func createShortURL() http.HandlerFunc {
 			return
 		}
 
-		id, err := storage.GetStorage().PutURL(string(bodyBytes))
+		id := uuid.New().String()
+
+		_, err = storage.GetStorage().PutURL(id, string(bodyBytes))
 		if err != nil {
 			sugar.Errorf("ERROR Can't writing content to HTTP response. %s", err)
 			rw.WriteHeader(http.StatusBadRequest)
@@ -104,7 +107,9 @@ func createShortURLJson() http.HandlerFunc {
 			return
 		}
 
-		id, err := storage.GetStorage().PutURL(req.URL)
+		id := uuid.New().String()
+
+		_, err := storage.GetStorage().PutURL(id, req.URL)
 		if err != nil {
 			sugar.Errorf("ERROR Can't writing content to HTTP response. %s", err)
 			rw.WriteHeader(http.StatusBadRequest)
@@ -132,7 +137,7 @@ func createShortURLBatchJSON() http.HandlerFunc {
 	fn := func(rw http.ResponseWriter, r *http.Request) {
 		sugar := logging.GetSugarLogger()
 
-		sugar.Infoln("Create short url")
+		sugar.Infoln("Create batch short url")
 
 		var req []models.RequestBatch
 		dec := json.NewDecoder(r.Body)

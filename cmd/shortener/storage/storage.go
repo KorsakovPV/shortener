@@ -10,21 +10,78 @@ import (
 )
 
 type AbstractStorage interface {
-	PutURL(string) (string, error)
+	PutURL(string, string) (string, error)
 	GetURL(string) (string, error)
 	PutURLBatch([]models.RequestBatch) ([]models.ResponseButch, error)
 	InitStorage() error
 }
 
-var storage AbstractStorage
+type Struct struct{}
+
+func (s Struct) PutURL(id string, body string) (string, error) {
+	cfg := config.GetConfig()
+
+	_, err := localStorage.PutURL(id, body)
+	if err != nil {
+		return "", err
+	}
+
+	if cfg.FlagDataBaseDSN != "" {
+		_, err = dbStorage.PutURL(id, body)
+		if err != nil {
+			return "", err
+		}
+	}
+	return id, nil
+}
+
+func (s Struct) GetURL(id string) (string, error) {
+	cfg := config.GetConfig()
+
+	if cfg.FlagDataBaseDSN != "" {
+		url, err := dbStorage.GetURL(id)
+		if err != nil {
+			return "", err
+		}
+		return url, err
+	}
+
+	url, err := localStorage.GetURL(id)
+	if err != nil {
+		return "", err
+	}
+	return url, err
+}
+
+func (s Struct) PutURLBatch(body []models.RequestBatch) ([]models.ResponseButch, error) {
+	cfg := config.GetConfig()
+
+	bodyResponseButch, err := localStorage.PutURLBatch(body)
+	if err != nil {
+		return nil, err
+	}
+
+	if cfg.FlagDataBaseDSN != "" {
+		_, err := dbStorage.PutURLBatch(body)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return bodyResponseButch, nil
+}
+
+func (s Struct) InitStorage() error {
+	//TODO implement me
+	panic("implement me")
+}
+
+var s AbstractStorage = Struct{}
 
 var localStorage AbstractStorage = &localstorage.LocalStorageStruct{
 	ShortURL: map[string]string{},
 }
 
-var dbStorage AbstractStorage = &dbstorage.DBStorageStruct{
-	//ShortURL: map[string]string{},
-}
+var dbStorage AbstractStorage = &dbstorage.DBStorageStruct{}
 
 func InitStorage() error {
 	sugar := logging.GetSugarLogger()
@@ -48,8 +105,8 @@ func InitStorage() error {
 }
 
 func InitDBStorage(cfg *config.Сonfiguration, sugar zap.SugaredLogger) error {
-	storage = dbStorage
-	err := storage.InitStorage()
+	//storage = dbStorage
+	err := dbStorage.InitStorage()
 	if err != nil {
 		sugar.Errorf("ERROR Init DB Storage. %s", err)
 		return err
@@ -59,11 +116,11 @@ func InitDBStorage(cfg *config.Сonfiguration, sugar zap.SugaredLogger) error {
 }
 
 func InitLocalStorage(cfg *config.Сonfiguration, sugar zap.SugaredLogger) error {
-	storage = localStorage
+	//storage = localStorage
 
 	// Если в конфиге есть имя файла, то загружаем его
 	if cfg.FlagFileStoragePath != "" {
-		err := storage.InitStorage()
+		err := localStorage.InitStorage()
 		if err != nil {
 			sugar.Errorf("ERROR Init Local Storage. %s", err)
 			return err
@@ -78,9 +135,5 @@ func InitLocalStorage(cfg *config.Сonfiguration, sugar zap.SugaredLogger) error
 }
 
 func GetStorage() AbstractStorage {
-	return storage
-}
-
-func GetLocalStorage() AbstractStorage {
-	return localStorage
+	return s
 }
