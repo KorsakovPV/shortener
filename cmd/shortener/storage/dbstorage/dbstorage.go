@@ -127,8 +127,6 @@ func (s *DBStorageStruct) InitStorage() error {
 	}
 
 	// Создаем таблицу для хранения.
-	//_, err = conn.Exec(context.Background(), "CREATE TABLE IF NOT EXISTS short_url (id UUID PRIMARY KEY, original_url TEXT NOT NULL);")
-	//Так как в задании требуется реализовать с короткими урлами пришедшими из ручки, а там не uuid поменял схему на TEXT
 	_, err = conn.Exec(context.Background(), "CREATE TABLE IF NOT EXISTS short_url (id TEXT PRIMARY KEY, original_url TEXT NOT NULL);")
 	if err != nil {
 		sugar.Errorf("Create table failed %v\n", err)

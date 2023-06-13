@@ -109,7 +109,6 @@ func InitStorage() error {
 }
 
 func InitDBStorage(cfg *config.Сonfiguration, sugar zap.SugaredLogger) error {
-	//storage = dbStorage
 	err := dbStorage.InitStorage()
 	if err != nil {
 		sugar.Errorf("ERROR Init DB Storage. %s", err)
@@ -120,7 +119,6 @@ func InitDBStorage(cfg *config.Сonfiguration, sugar zap.SugaredLogger) error {
 }
 
 func InitLocalStorage(cfg *config.Сonfiguration, sugar zap.SugaredLogger) error {
-	//storage = localStorage
 
 	// Если в конфиге есть имя файла, то загружаем его
 	if cfg.FlagFileStoragePath != "" {

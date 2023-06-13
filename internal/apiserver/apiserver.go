@@ -55,7 +55,6 @@ func createShortURL() http.HandlerFunc {
 }
 
 func pingDB() http.HandlerFunc {
-	// TODO Переписать функцию чтоб подключение бралось из storeage
 	fn := func(rw http.ResponseWriter, r *http.Request) {
 		sugar := logging.GetSugarLogger()
 
@@ -63,7 +62,6 @@ func pingDB() http.HandlerFunc {
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		//err := dbstorage.PingDB(ctx)
 		err := PingDB(ctx)
 		if err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
