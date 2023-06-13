@@ -2,6 +2,7 @@ package dbstorage
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/KorsakovPV/shortener/cmd/shortener/config"
 	"github.com/KorsakovPV/shortener/cmd/shortener/logging"
@@ -77,7 +78,7 @@ func (s *DBStorageStruct) PutURLBatch(body []models.RequestBatch) ([]models.Resp
 
 	for i := 0; i < len(body); i++ {
 		bodyResponseButch[i].UUID = body[i].UUID
-		bodyResponseButch[i].URL = body[i].URL
+		bodyResponseButch[i].URL = fmt.Sprintf("%s/%s", cfg.FlagBaseURLAddr, body[i].UUID)
 	}
 
 	return bodyResponseButch, nil
