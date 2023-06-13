@@ -107,6 +107,8 @@ func createShortURLJson() http.HandlerFunc {
 			return
 		}
 
+		sugar.Infoln(req)
+
 		id := uuid.New().String()
 
 		_, err := storage.GetStorage().PutURL(id, req.URL)
@@ -128,7 +130,7 @@ func createShortURLJson() http.HandlerFunc {
 			sugar.Debug("error encoding response", zap.Error(err))
 			return
 		}
-
+		sugar.Infoln(resp)
 	}
 	return http.HandlerFunc(fn)
 }
@@ -147,6 +149,8 @@ func createShortURLBatchJSON() http.HandlerFunc {
 			return
 		}
 
+		sugar.Infoln(req)
+
 		bodyResponseButch, err := storage.GetStorage().PutURLBatch(req)
 		if err != nil {
 			sugar.Errorf("ERROR Can't writing content to HTTP response. %s", err)
@@ -163,6 +167,7 @@ func createShortURLBatchJSON() http.HandlerFunc {
 			sugar.Debug("error encoding response", zap.Error(err))
 			return
 		}
+		sugar.Infoln(resp)
 	}
 	return http.HandlerFunc(fn)
 }
@@ -171,6 +176,8 @@ func readShortURL() http.HandlerFunc {
 
 	fn := func(rw http.ResponseWriter, r *http.Request) {
 		sugar := logging.GetSugarLogger()
+
+		sugar.Infof("Get URL. id=%s", chi.URLParam(r, "id"))
 
 		shortURL, err := storage.GetStorage().GetURL(chi.URLParam(r, "id"))
 

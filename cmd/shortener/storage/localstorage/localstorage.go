@@ -130,7 +130,7 @@ func (s *LocalStorageStruct) PutURLBatch(body []models.RequestBatch) ([]models.R
 			return nil, fmt.Errorf("id %s is exist", id)
 		}
 		bodyResponseButch[i].UUID = id
-		bodyResponseButch[i].URL = url
+		bodyResponseButch[i].URL = fmt.Sprintf("%s/%s", cfg.FlagBaseURLAddr, id)
 		urls[i].UUID = id
 		urls[i].OriginalURL = url
 	}
