@@ -38,7 +38,7 @@ func (s *DBStorageStruct) PutURL(id string, body string) (string, error) {
 
 	if id != _id {
 		err = ErrConflict
-		return id, err
+		return _id, err
 	}
 
 	return id, err
