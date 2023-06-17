@@ -8,9 +8,7 @@ import (
 	"github.com/KorsakovPV/shortener/cmd/shortener/config"
 	"github.com/KorsakovPV/shortener/cmd/shortener/logging"
 	"github.com/KorsakovPV/shortener/internal/models"
-	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
@@ -31,24 +29,20 @@ func (s *DBStorageStruct) PutURL(id string, body string) (string, error) {
 	}
 	defer conn.Close(ctx)
 
-	_, err = conn.Exec(ctx, "INSERT INTO public.short_url (id, original_url)VALUES ($1, $2);", id, body)
+	var _id string
+	err = conn.QueryRow(ctx, "INSERT INTO public.short_url (id, original_url) VALUES ($1, $2) ON CONFLICT (original_url) DO UPDATE SET original_url=EXCLUDED.original_url RETURNING id;", id, body).Scan(&_id)
 
 	if err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
-			err = ErrConflict
-
-			var id string
-			errSelect := conn.QueryRow(context.Background(), "select id from short_url where original_url=$1", body).Scan(&id)
-			if errSelect != nil {
-				sugar.Errorf("QueryRow failed: %v\n", err)
-				return "", errSelect
-			}
-			return id, err
-		}
+		return id, err
 	}
 
-	return id, nil
+	if id != _id {
+		err = ErrConflict
+		return id, err
+	}
+
+	return id, err
+
 }
 
 func (s *DBStorageStruct) PutURLBatch(body []models.RequestBatch) ([]models.ResponseButch, error) {
