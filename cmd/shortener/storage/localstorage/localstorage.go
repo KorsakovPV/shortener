@@ -60,7 +60,7 @@ func NewConsumer(filename string) (*Consumer, error) {
 	}, nil
 }
 
-// TODO попросили заменить на []*ShortURL
+// TODO попросили заменить на []*ShortURL Артем
 func (c *Consumer) ReadShortURL() (*[]ShortURL, error) {
 	events := &[]ShortURL{}
 	for {
@@ -182,7 +182,7 @@ func (s *LocalStorageStruct) InitStorage() error {
 		return err
 	}
 
-	// TODO нужно переделать цикл. скорее всего убрать *
+	// TODO нужно переделать цикл. скорее всего убрать * Артем
 	for _, url := range *urls {
 		s.ShortURL[url.UUID] = url.OriginalURL
 	}

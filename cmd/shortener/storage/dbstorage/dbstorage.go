@@ -62,22 +62,13 @@ func (s *DBStorageStruct) PutURLBatch(body []models.RequestBatch) ([]models.Resp
 			sugar.Errorf("Error %s", err)
 		}
 	}(conn, context.Background())
-	tx, err := conn.Begin(ctx)
-	if err != nil {
-		return nil, err
-	}
+
+	batch := &pgx.Batch{}
 	for i := 0; i < len(body); i++ {
-		_, err = tx.Exec(ctx,
-			"INSERT INTO short_url (id, original_url) VALUES($1, $2)", body[i].UUID, body[i].URL)
-		if err != nil {
-			err := tx.Rollback(ctx)
-			if err != nil {
-				return nil, err
-			}
-			return nil, err
-		}
+		batch.Queue("INSERT INTO short_url (id, original_url) VALUES($1, $2)", body[i].UUID, body[i].URL)
 	}
-	err = tx.Commit(ctx)
+	br := conn.SendBatch(ctx, batch)
+	_, err = br.Exec()
 	if err != nil {
 		return nil, err
 	}
