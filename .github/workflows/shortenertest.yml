@@ -59,6 +59,7 @@ jobs:
       - name: Build server binary
         run: |
           cd cmd/shortener
+          curl -L https://github.com/golang-migrate/migrate/releases/download/$version/migrate.$os-$arch.tar.gz | tar xvz
           go build -buildvcs=false -o shortener
 
       - name: "Code increment #1"
