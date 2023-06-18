@@ -105,29 +105,4 @@ func (s *DBStorageStruct) GetURL(id string) (string, error) {
 
 func (s *DBStorageStruct) InitStorage() error {
 	return nil
-	//sugar := logging.GetSugarLogger()
-	//cfg := config.GetConfig()
-	//ctx := context.Background()
-	//
-	//conn, err := pgx.Connect(ctx, cfg.FlagDataBaseDSN)
-	//if err != nil {
-	//	sugar.Errorf("Unable to connect to database: %v\n", err)
-	//	return err
-	//}
-	//defer conn.Close(context.Background())
-	//
-	//// Устанавливаем расширение для uuid.
-	//_, err = conn.Exec(context.Background(), "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";")
-	//if err != nil {
-	//	sugar.Errorf("Createuuid extension failed: %v\n", err)
-	//	return err
-	//}
-	//
-	//// Создаем таблицу для хранения.
-	//_, err = conn.Exec(context.Background(), "CREATE TABLE IF NOT EXISTS short_url (id TEXT PRIMARY KEY, original_url TEXT NOT NULL UNIQUE);")
-	//if err != nil {
-	//	sugar.Errorf("Create table failed %v\n", err)
-	//	return err
-	//}
-	//return err
 }
