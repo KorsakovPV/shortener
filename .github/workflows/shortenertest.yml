@@ -18,7 +18,7 @@ jobs:
 
   shortenertest:
     runs-on: ubuntu-latest
-    container: golang:1.19
+    container: golang:1.20
     needs: branchtest
 
     services:
@@ -60,6 +60,8 @@ jobs:
         run: |
           cd cmd/shortener
           go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+          migrate up
+          migrate -path migrations -database postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable up
           go build -buildvcs=false -o shortener
 
       - name: "Code increment #1"
