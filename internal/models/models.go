@@ -19,8 +19,8 @@ type ResponseButch struct {
 }
 
 type ResponseButchForUser struct {
-	SHORT_URL    string `json:"short_url"`
-	ORIGINAL_URL string `json:"original_url"`
+	ShortURL    string `json:"short_url"`
+	OriginalURL string `json:"original_url"`
 }
 
 type Employee struct {
