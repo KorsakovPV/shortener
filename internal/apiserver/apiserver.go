@@ -239,7 +239,7 @@ func readShortURL() http.HandlerFunc {
 
 		sugar.Infof("Get URL. id=%s", chi.URLParam(r, "id"))
 
-		shortURL, err := storage.GetStorage().GetURL(chi.URLParam(r, "id"))
+		originalURL, err := storage.GetStorage().GetURL(chi.URLParam(r, "id"))
 
 		if err != nil {
 			sugar.Errorf("ERROR %s", err)
@@ -248,9 +248,9 @@ func readShortURL() http.HandlerFunc {
 		}
 
 		rw.Header().Set("Content-Type", "text/plain")
-		sugar.Infof("Get short url %s", shortURL)
+		sugar.Infof("Get short url %s", originalURL)
 
-		rw.Header().Set("Location", shortURL)
+		rw.Header().Set("Location", originalURL)
 		rw.WriteHeader(http.StatusTemporaryRedirect)
 	}
 	return http.HandlerFunc(fn)
@@ -268,7 +268,7 @@ func methodNotAllowed() http.HandlerFunc {
 }
 
 func middlewares(h http.HandlerFunc) http.HandlerFunc {
-	return middleware.AuthMiddleware(middleware.WithLogging(middleware.GzipMiddleware(h)))
+	return middleware.WithLogging(middleware.GzipMiddleware(middleware.AuthMiddleware(h)))
 }
 
 func Router() chi.Router {
