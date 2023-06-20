@@ -60,7 +60,6 @@ func NewConsumer(filename string) (*Consumer, error) {
 	}, nil
 }
 
-// TODO попросили заменить на []*ShortURL Артем
 func (c *Consumer) ReadShortURL() ([]*ShortURL, error) {
 	events := []*ShortURL{}
 	for {
@@ -88,7 +87,7 @@ type LocalStorageStruct struct {
 	ShortURL map[string]string
 }
 
-func (s *LocalStorageStruct) PutURL(id string, body string) (string, error) {
+func (s *LocalStorageStruct) PutURL(id string, body string, userID interface{}) (string, error) {
 
 	cfg := config.GetConfig()
 
@@ -115,7 +114,7 @@ func (s *LocalStorageStruct) PutURL(id string, body string) (string, error) {
 	return id, nil
 }
 
-func (s *LocalStorageStruct) PutURLBatch(body []models.RequestBatch) ([]models.ResponseButch, error) {
+func (s *LocalStorageStruct) PutURLBatch(body []models.RequestBatch, userID interface{}) ([]models.ResponseButch, error) {
 	cfg := config.GetConfig()
 
 	bodyResponseButch := make([]models.ResponseButch, len(body))
@@ -182,9 +181,13 @@ func (s *LocalStorageStruct) InitStorage() error {
 		return err
 	}
 
-	// TODO нужно переделать цикл. скорее всего убрать * Артем
 	for _, url := range urls {
 		s.ShortURL[url.UUID] = url.OriginalURL
 	}
 	return nil
+}
+
+func (s *LocalStorageStruct) GetURLBatch(userID interface{}) ([]models.ResponseButchForUser, error) {
+	//TODO implement me
+	panic("implement me")
 }
