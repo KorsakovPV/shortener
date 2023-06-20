@@ -70,7 +70,7 @@ func AuthMiddleware(h http.HandlerFunc) http.HandlerFunc {
 		if tokenWithUserID == nil {
 			tokenWithUserID, userID := GetUserID("")
 
-			cookie := http.Cookie{Name: "user_id", Value: tokenWithUserID}
+			cookie := http.Cookie{Name: "user_id", Value: tokenWithUserID, Path: "/"}
 			http.SetCookie(w, &cookie)
 			context.Set(r, "userID", userID)
 			h.ServeHTTP(ow, r)
@@ -78,7 +78,7 @@ func AuthMiddleware(h http.HandlerFunc) http.HandlerFunc {
 			//Кука есть, user id есть. Проверяем подпись. Если не сошлась, выдаем новую и пропускаем. Если сошлась, то просто пропускаем
 
 			tokenString, userID := GetUserID(tokenWithUserID.Value)
-			cookie := http.Cookie{Name: "user_id", Value: tokenString}
+			cookie := http.Cookie{Name: "user_id", Value: tokenString, Path: "/"}
 			http.SetCookie(w, &cookie)
 			context.Set(r, "userID", userID)
 			h.ServeHTTP(ow, r)
