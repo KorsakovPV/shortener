@@ -61,8 +61,8 @@ func NewConsumer(filename string) (*Consumer, error) {
 }
 
 // TODO попросили заменить на []*ShortURL Артем
-func (c *Consumer) ReadShortURL() (*[]ShortURL, error) {
-	events := &[]ShortURL{}
+func (c *Consumer) ReadShortURL() ([]*ShortURL, error) {
+	events := []*ShortURL{}
 	for {
 		data, _, err := c.reader.ReadLine()
 		if err == io.EOF {
@@ -71,12 +71,12 @@ func (c *Consumer) ReadShortURL() (*[]ShortURL, error) {
 		if err != nil {
 			return nil, err
 		}
-		url := ShortURL{}
-		err = json.Unmarshal(data, &url)
+		url := &ShortURL{}
+		err = json.Unmarshal(data, url)
 		if err != nil {
 			return nil, err
 		}
-		*events = append(*events, url)
+		events = append(events, url)
 	}
 }
 
@@ -183,7 +183,7 @@ func (s *LocalStorageStruct) InitStorage() error {
 	}
 
 	// TODO нужно переделать цикл. скорее всего убрать * Артем
-	for _, url := range *urls {
+	for _, url := range urls {
 		s.ShortURL[url.UUID] = url.OriginalURL
 	}
 	return nil

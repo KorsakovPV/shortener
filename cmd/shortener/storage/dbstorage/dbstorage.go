@@ -29,6 +29,8 @@ func (s *DBStorageStruct) PutURL(id string, body string) (string, error) {
 	}
 	defer conn.Close(ctx)
 
+	// TODO Артем https://github.com/GoogleCloudPlatform/pgadapter/blob/postgresql-dialect/docs/pgx.md#batching
+
 	var _id string
 	err = conn.QueryRow(ctx, "INSERT INTO public.short_url (id, original_url) VALUES ($1, $2) ON CONFLICT (original_url) DO UPDATE SET original_url=EXCLUDED.original_url RETURNING id;", id, body).Scan(&_id)
 
@@ -62,6 +64,8 @@ func (s *DBStorageStruct) PutURLBatch(body []models.RequestBatch) ([]models.Resp
 			sugar.Errorf("Error %s", err)
 		}
 	}(conn, context.Background())
+
+	// TODO Артем
 
 	batch := &pgx.Batch{}
 	for i := 0; i < len(body); i++ {
