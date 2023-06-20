@@ -201,26 +201,22 @@ func listShortURLUserBatchJSON() http.HandlerFunc {
 		userID := con.Get(r, "userID")
 		sugar.Infoln("Create batch short url")
 
-		//var req []models.RequestBatch
-		//dec := json.NewDecoder(r.Body)
-		//if err := dec.Decode(&req); err != nil {
-		//	sugar.Debug("cannot decode request JSON body", zap.Error(err))
-		//	rw.WriteHeader(http.StatusInternalServerError)
-		//	return
-		//}
-		//
-		//sugar.Infoln(req)
-
 		bodyResponseButch, err := storage.GetStorage().GetURLBatch(userID)
 		if err != nil {
 			sugar.Errorf("ERROR Can't writing content to HTTP response. %s", err)
 			rw.WriteHeader(http.StatusBadRequest)
 			return
 		}
+
+		if len(bodyResponseButch) == 0 {
+			rw.Header().Set("Content-Type", "application/json")
+			rw.WriteHeader(http.StatusNoContent)
+			return
+		}
 		resp := bodyResponseButch
 
 		rw.Header().Set("Content-Type", "application/json")
-		rw.WriteHeader(http.StatusCreated)
+		rw.WriteHeader(http.StatusOK)
 
 		enc := json.NewEncoder(rw)
 		if err := enc.Encode(resp); err != nil {
