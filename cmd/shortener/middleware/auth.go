@@ -17,7 +17,7 @@ type Claims struct {
 	UserID string
 }
 
-var userId string
+//var userId string
 
 const TOKEN_EXP = time.Hour * 3
 const SECRET_KEY = "my-256-bit-secret"
