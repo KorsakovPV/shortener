@@ -104,7 +104,7 @@ func (s *DBStorageStruct) GetURLBatch(userID interface{}) ([]models.ResponseButc
 		}
 	}(conn, context.Background())
 
-	rows, err := conn.Query(ctx, "select id, original_url from shortener.public.short_url where created_by=$1", userID) //.Scan(&ID, &OriginalURL)
+	rows, err := conn.Query(ctx, "select id, original_url from public.short_url where created_by=$1", userID) //.Scan(&ID, &OriginalURL)
 	if err != nil {
 		sugar.Errorf("Query failed: %v\n", err)
 		return nil, err
