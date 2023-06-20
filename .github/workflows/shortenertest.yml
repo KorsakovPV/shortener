@@ -380,11 +380,11 @@ jobs:
           github.head_ref == 'iter23' ||
           github.head_ref == 'iter24'
         run: |
-          migrate -path cmd/shortener/migrations -database postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable up 1
+          migrate -path cmd/shortener/migrations -database postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable up 2
           shortenertestbeta -test.v -test.run=^TestIteration12$ \
               -binary-path=cmd/shortener/shortener \
               -database-dsn='postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable'
-          migrate -path cmd/shortener/migrations -database postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable down 1
+          migrate -path cmd/shortener/migrations -database postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable down 2
 
       - name: "Code increment #13"
         if: |
@@ -402,11 +402,11 @@ jobs:
           github.head_ref == 'iter23' ||
           github.head_ref == 'iter24'
         run: |
-          migrate -path cmd/shortener/migrations -database postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable up 1
+          migrate -path cmd/shortener/migrations -database postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable up 2
           shortenertestbeta -test.v -test.run=^TestIteration13$ \
               -binary-path=cmd/shortener/shortener \
               -database-dsn='postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable'
-          migrate -path cmd/shortener/migrations -database postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable down 1
+          migrate -path cmd/shortener/migrations -database postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable down 2
 
       - name: "Code increment #14"
         if: |
