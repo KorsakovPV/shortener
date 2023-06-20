@@ -264,7 +264,7 @@ func methodNotAllowed() http.HandlerFunc {
 }
 
 func middlewares(h http.HandlerFunc) http.HandlerFunc {
-	return middleware.AuthMiddleware(middleware.WithLogging(middleware.GzipMiddleware(h)))
+	return middleware.WithLogging(middleware.GzipMiddleware(middleware.AuthMiddleware(h)))
 }
 
 func Router() chi.Router {
