@@ -123,7 +123,7 @@ func (s *DBStorageStruct) GetURLBatch(userID interface{}) ([]models.ResponseButc
 		row := models.ResponseButchForUser{}
 
 		row.ShortURL = fmt.Sprintf("%s/%s", cfg.FlagBaseURLAddr, ID)
-		row.OriginalURL = fmt.Sprintf("%s/%s", cfg.FlagBaseURLAddr, OriginalURL)
+		row.OriginalURL = fmt.Sprintf("%s", OriginalURL)
 
 		fmt.Println(ID, OriginalURL)
 
