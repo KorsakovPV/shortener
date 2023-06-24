@@ -443,6 +443,8 @@ jobs:
           github.head_ref == 'iter23' ||
           github.head_ref == 'iter24'
         run: |
+          migrate -path cmd/shortener/migrations -database postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable up 3
           shortenertestbeta -test.v -test.run=^TestIteration15$ \
               -binary-path=cmd/shortener/shortener \
               -database-dsn='postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable'
+          migrate -path cmd/shortener/migrations -database postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable down 3

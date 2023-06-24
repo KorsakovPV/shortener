@@ -63,9 +63,7 @@ func (s *DBStorageStruct) PutURLBatch(body []models.RequestBatch, userID interfa
 		if err != nil {
 			sugar.Errorf("Error %s", err)
 		}
-	}(conn, context.Background())
-
-	// TODO Артем
+	}(conn, ctx)
 
 	batch := &pgx.Batch{}
 	for i := 0; i < len(body); i++ {
@@ -102,7 +100,7 @@ func (s *DBStorageStruct) GetURLBatch(userID interface{}) ([]models.ResponseButc
 		if err != nil {
 			sugar.Errorf("Error %s", err)
 		}
-	}(conn, context.Background())
+	}(conn, ctx)
 
 	rows, err := conn.Query(ctx, "select id, original_url from public.short_url where created_by=$1", userID) //.Scan(&ID, &OriginalURL)
 	if err != nil {
@@ -148,10 +146,10 @@ func (s *DBStorageStruct) GetURL(id string) (string, error) {
 		sugar.Errorf("Unable to connect to database: %v\n", err)
 		return "", err
 	}
-	defer conn.Close(context.Background())
+	defer conn.Close(ctx)
 
 	var OriginalURL string
-	err = conn.QueryRow(context.Background(), "select original_url from short_url where id=$1", id).Scan(&OriginalURL)
+	err = conn.QueryRow(ctx, "select original_url from short_url where id=$1 and is_deleted=false", id).Scan(&OriginalURL)
 	if err != nil {
 		sugar.Errorf("QueryRow failed: %v\n", err)
 		return "", err
@@ -162,4 +160,32 @@ func (s *DBStorageStruct) GetURL(id string) (string, error) {
 
 func (s *DBStorageStruct) InitStorage() error {
 	return nil
+}
+
+func (s *DBStorageStruct) DeleteURLBatch(req []string, userID interface{}) error {
+	sugar := logging.GetSugarLogger()
+	cfg := config.GetConfig()
+	ctx := context.Background()
+
+	conn, err := pgx.Connect(ctx, cfg.FlagDataBaseDSN)
+	if err != nil {
+		sugar.Errorf("Unable to connect to database: %v\n", err)
+		return err
+	}
+	defer func(conn *pgx.Conn, ctx context.Context) {
+		err := conn.Close(ctx)
+		if err != nil {
+			sugar.Errorf("Error %s", err)
+		}
+	}(conn, ctx)
+
+	batch := &pgx.Batch{}
+	for i := 0; i < len(req); i++ {
+		batch.Queue("UPDATE public.short_url\nSET is_deleted = false\nWHERE id = $1 and created_by = $2;", req[i], userID)
+	}
+	br := conn.SendBatch(ctx, batch)
+	_, err = br.Exec()
+	if err != nil {
+		return err
+	}
 }

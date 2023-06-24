@@ -228,6 +228,42 @@ func listShortURLUserBatchJSON() http.HandlerFunc {
 	return http.HandlerFunc(fn)
 }
 
+func deleteShortURLUserBatchJSON() http.HandlerFunc {
+	fn := func(rw http.ResponseWriter, r *http.Request) {
+		sugar := logging.GetSugarLogger()
+		userID := con.Get(r, "userID")
+		sugar.Infoln("Delete batch short url")
+
+		//var req []models.RequestBatchDeleted
+		var req []string
+		dec := json.NewDecoder(r.Body)
+		if err := dec.Decode(&req); err != nil {
+			sugar.Debug("cannot decode request JSON body", zap.Error(err))
+			rw.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		sugar.Infoln(req)
+
+		if len(req) == 0 {
+			rw.Header().Set("Content-Type", "application/json")
+			rw.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		go func() {
+			err := storage.GetStorage().DeleteURLBatch(req, userID)
+			if err != nil {
+				sugar.Error(zap.Error(err))
+			}
+		}()
+
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusAccepted)
+	}
+	return http.HandlerFunc(fn)
+}
+
 func readShortURL() http.HandlerFunc {
 
 	fn := func(rw http.ResponseWriter, r *http.Request) {
@@ -236,6 +272,12 @@ func readShortURL() http.HandlerFunc {
 		sugar.Infof("Get URL. id=%s", chi.URLParam(r, "id"))
 
 		originalURL, err := storage.GetStorage().GetURL(chi.URLParam(r, "id"))
+
+		if errors.Is(err, pgx.ErrNoRows) {
+			sugar.Errorf("ERROR %s", err)
+			rw.WriteHeader(http.StatusGone)
+			return
+		}
 
 		if err != nil {
 			sugar.Errorf("ERROR %s", err)
@@ -274,6 +316,7 @@ func Router() chi.Router {
 	r.Post("/api/shorten", middlewares(createShortURLJson()))
 	r.Post("/api/shorten/batch", middlewares(createShortURLBatchJSON()))
 	r.Get("/api/user/urls", middlewares(listShortURLUserBatchJSON()))
+	r.Delete("/api/user/urls", middlewares(deleteShortURLUserBatchJSON()))
 	r.Get("/ping", middlewares(pingDB()))
 	r.Get("/{id}", middlewares(readShortURL()))
 	r.Post("/", middlewares(createShortURL()))

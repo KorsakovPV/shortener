@@ -191,3 +191,8 @@ func (s *LocalStorageStruct) GetURLBatch(userID interface{}) ([]models.ResponseB
 	//TODO implement me
 	panic("implement me")
 }
+
+func (s *LocalStorageStruct) DeleteURLBatch(req []string, userID interface{}) error {
+	//TODO implement me
+	panic("implement me")
+}

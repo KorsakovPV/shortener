@@ -14,6 +14,7 @@ type AbstractStorage interface {
 	GetURL(string) (string, error)
 	PutURLBatch([]models.RequestBatch, interface{}) ([]models.ResponseButch, error)
 	GetURLBatch(interface{}) ([]models.ResponseButchForUser, error)
+	DeleteURLBatch([]string, interface{}) error
 	InitStorage() error
 }
 
@@ -70,6 +71,25 @@ func (s Struct) GetURLBatch(userID interface{}) ([]models.ResponseButchForUser, 
 	}
 
 	return bodyResponseButch, nil
+}
+
+func (s Struct) DeleteURLBatch(req []string, userID interface{}) error {
+	cfg := config.GetConfig()
+
+	if cfg.FlagDataBaseDSN != "" {
+		err := dbStorage.DeleteURLBatch(req, userID)
+		//if err != nil {
+		//	return err
+		//}
+		return err
+	}
+
+	err := localStorage.DeleteURLBatch(req, userID)
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	return err
 }
 
 func (s Struct) PutURLBatch(body []models.RequestBatch, userID interface{}) ([]models.ResponseButch, error) {
