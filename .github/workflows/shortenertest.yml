@@ -332,12 +332,12 @@ jobs:
         run: |
           pwd
           ls -la
-          migrate -path cmd/shortener/migrations -database postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable up 2
+          migrate -path cmd/shortener/migrations -database postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable up 3
           shortenertestbeta -test.v -test.run=^TestIteration10$ \
               -binary-path=cmd/shortener/shortener \
               -source-path=. \
               -database-dsn='postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable'
-          migrate -path cmd/shortener/migrations -database postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable down 2
+          migrate -path cmd/shortener/migrations -database postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable down 3
 
       - name: "Code increment #11"
         if: |
