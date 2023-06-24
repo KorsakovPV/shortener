@@ -185,7 +185,8 @@ func (s *DBStorageStruct) DeleteURLBatch(req []string, userID interface{}) error
 	}
 	br := conn.SendBatch(ctx, batch)
 	_, err = br.Exec()
-	if err != nil {
-		return err
-	}
+	//if err != nil {
+	//	return err
+	//}
+	return err
 }
