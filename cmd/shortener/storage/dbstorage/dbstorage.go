@@ -181,7 +181,7 @@ func (s *DBStorageStruct) DeleteURLBatch(req []string, userID interface{}) error
 
 	batch := &pgx.Batch{}
 	for i := 0; i < len(req); i++ {
-		batch.Queue("UPDATE public.short_url\nSET is_deleted = false\nWHERE id = $1 and created_by = $2;", req[i], userID)
+		batch.Queue("UPDATE public.short_url SET is_deleted = true WHERE id = $1 and created_by = $2;", req[i], userID)
 	}
 	br := conn.SendBatch(ctx, batch)
 	_, err = br.Exec()
