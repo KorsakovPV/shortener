@@ -10,14 +10,10 @@ import (
 	"github.com/gorilla/context"
 )
 
-// Claims — структура утверждений, которая включает стандартные утверждения
-// и одно пользовательское — UserID
 type Claims struct {
 	jwt.RegisteredClaims
 	UserID string
 }
-
-//var userId string
 
 const TokenExp = time.Hour * 3
 const SecretKey = "my-256-bit-secret"
