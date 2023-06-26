@@ -1,9 +1,10 @@
 package middleware
 
 import (
-	"github.com/KorsakovPV/shortener/cmd/shortener/gzip"
 	"net/http"
 	"strings"
+
+	"github.com/KorsakovPV/shortener/internal/gzip"
 )
 
 func GzipMiddleware(h http.HandlerFunc) http.HandlerFunc {

@@ -4,11 +4,12 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/KorsakovPV/shortener/cmd/shortener/config"
-	"github.com/google/uuid"
 	"io"
 	"log"
 	"os"
+
+	"github.com/KorsakovPV/shortener/cmd/shortener/config"
+	"github.com/KorsakovPV/shortener/internal/models"
 )
 
 type ShortURL struct {
@@ -59,8 +60,8 @@ func NewConsumer(filename string) (*Consumer, error) {
 	}, nil
 }
 
-func (c *Consumer) ReadShortURL() (*[]ShortURL, error) {
-	events := &[]ShortURL{}
+func (c *Consumer) ReadShortURL() ([]*ShortURL, error) {
+	events := []*ShortURL{}
 	for {
 		data, _, err := c.reader.ReadLine()
 		if err == io.EOF {
@@ -69,12 +70,12 @@ func (c *Consumer) ReadShortURL() (*[]ShortURL, error) {
 		if err != nil {
 			return nil, err
 		}
-		url := ShortURL{}
-		err = json.Unmarshal(data, &url)
+		url := &ShortURL{}
+		err = json.Unmarshal(data, url)
 		if err != nil {
 			return nil, err
 		}
-		*events = append(*events, url)
+		events = append(events, url)
 	}
 }
 
@@ -86,8 +87,7 @@ type LocalStorageStruct struct {
 	ShortURL map[string]string
 }
 
-func (s *LocalStorageStruct) PutURL(body string) (string, error) {
-	id := uuid.New().String()
+func (s *LocalStorageStruct) PutURL(id string, body string) (string, error) {
 
 	cfg := config.GetConfig()
 
@@ -114,6 +114,50 @@ func (s *LocalStorageStruct) PutURL(body string) (string, error) {
 	return id, nil
 }
 
+func (s *LocalStorageStruct) PutURLBatch(body []models.RequestBatch) ([]models.ResponseButch, error) {
+	cfg := config.GetConfig()
+
+	bodyResponseButch := make([]models.ResponseButch, len(body))
+	urls := make([]ShortURL, len(body))
+
+	for i := 0; i < len(body); i++ {
+		id := body[i].UUID
+		url := body[i].URL
+
+		_, ok := s.ShortURL[id]
+		if ok {
+			return nil, fmt.Errorf("id %s is exist", id)
+		}
+		bodyResponseButch[i].UUID = id
+		bodyResponseButch[i].URL = fmt.Sprintf("%s/%s", cfg.FlagBaseURLAddr, id)
+		urls[i].UUID = id
+		urls[i].OriginalURL = url
+	}
+
+	if cfg.FlagFileStoragePath != "" {
+		Produc, err := NewProducer(cfg.FlagFileStoragePath)
+		if err != nil {
+			return nil, err
+		}
+		defer Produc.Close()
+
+		_, err = json.Marshal(&urls)
+		if err != nil {
+			return nil, err
+		}
+
+		for i := 0; i < len(body); i++ {
+
+			if err := Produc.WriteEvent(urls[i]); err != nil {
+				return nil, err
+			}
+			s.ShortURL[urls[i].UUID] = urls[i].OriginalURL
+		}
+	}
+
+	return bodyResponseButch, nil
+}
+
 func (s *LocalStorageStruct) GetURL(id string) (string, error) {
 	url, ok := s.ShortURL[id]
 	if !ok {
@@ -123,7 +167,7 @@ func (s *LocalStorageStruct) GetURL(id string) (string, error) {
 	}
 }
 
-func (s *LocalStorageStruct) LoadBackupURL() error {
+func (s *LocalStorageStruct) InitStorage() error {
 	cfg := config.GetConfig()
 
 	Cons, err := NewConsumer(cfg.FlagFileStoragePath)
@@ -137,7 +181,7 @@ func (s *LocalStorageStruct) LoadBackupURL() error {
 		return err
 	}
 
-	for _, url := range *urls {
+	for _, url := range urls {
 		s.ShortURL[url.UUID] = url.OriginalURL
 	}
 	return nil
