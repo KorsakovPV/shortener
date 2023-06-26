@@ -78,17 +78,10 @@ func (s Struct) DeleteURLBatch(req []string, userID interface{}) error {
 
 	if cfg.FlagDataBaseDSN != "" {
 		err := dbStorage.DeleteURLBatch(req, userID)
-		//if err != nil {
-		//	return err
-		//}
 		return err
 	}
 
 	err := localStorage.DeleteURLBatch(req, userID)
-	//if err != nil {
-	//	return nil, err
-	//}
-
 	return err
 }
 

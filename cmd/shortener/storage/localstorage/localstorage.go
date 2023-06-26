@@ -42,7 +42,6 @@ func (p *Producer) Close() error {
 	return p.file.Close()
 }
 
-// Consumer
 type Consumer struct {
 	file   *os.File
 	reader *bufio.Reader

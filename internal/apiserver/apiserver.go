@@ -234,7 +234,6 @@ func deleteShortURLUserBatchJSON() http.HandlerFunc {
 		userID := con.Get(r, "userID")
 		sugar.Infoln("Delete batch short url")
 
-		//var req []models.RequestBatchDeleted
 		var req []string
 		dec := json.NewDecoder(r.Body)
 		if err := dec.Decode(&req); err != nil {

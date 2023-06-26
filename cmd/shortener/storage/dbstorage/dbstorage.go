@@ -29,8 +29,6 @@ func (s *DBStorageStruct) PutURL(id string, body string, userID interface{}) (st
 	}
 	defer conn.Close(ctx)
 
-	// TODO Артем https://github.com/GoogleCloudPlatform/pgadapter/blob/postgresql-dialect/docs/pgx.md#batching
-
 	var _id string
 	err = conn.QueryRow(ctx, "INSERT INTO public.short_url (id, original_url, created_by) VALUES ($1, $2, $3) ON CONFLICT (original_url) DO UPDATE SET original_url=EXCLUDED.original_url RETURNING id;", id, body, userID).Scan(&_id)
 
@@ -102,14 +100,13 @@ func (s *DBStorageStruct) GetURLBatch(userID interface{}) ([]models.ResponseButc
 		}
 	}(conn, ctx)
 
-	rows, err := conn.Query(ctx, "select id, original_url from public.short_url where created_by=$1", userID) //.Scan(&ID, &OriginalURL)
+	rows, err := conn.Query(ctx, "select id, original_url from public.short_url where created_by=$1", userID)
 	if err != nil {
 		sugar.Errorf("Query failed: %v\n", err)
 		return nil, err
 	}
 	defer rows.Close()
 
-	// пробегаем по всем записям
 	for rows.Next() {
 		var ID string
 		var OriginalURL string
@@ -127,13 +124,8 @@ func (s *DBStorageStruct) GetURLBatch(userID interface{}) ([]models.ResponseButc
 
 		bodyResponseButch = append(bodyResponseButch, row)
 	}
-	//for i := 0; i < len(body); i++ {
-	//	bodyResponseButch[i].UUID = body[i].UUID
-	//	bodyResponseButch[i].URL = fmt.Sprintf("%s/%s", cfg.FlagBaseURLAddr, body[i].UUID)
-	//}
 
 	return bodyResponseButch, nil
-	//return nil, nil
 }
 
 func (s *DBStorageStruct) GetURL(id string) (string, error) {
@@ -185,8 +177,5 @@ func (s *DBStorageStruct) DeleteURLBatch(req []string, userID interface{}) error
 	}
 	br := conn.SendBatch(ctx, batch)
 	_, err = br.Exec()
-	//if err != nil {
-	//	return err
-	//}
 	return err
 }
