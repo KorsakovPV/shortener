@@ -13,10 +13,9 @@ type RequestBatch struct {
 	URL  string `json:"original_url"`
 }
 
-type RequestBatchDeleted struct {
-	UUID string `json:"correlation_id"`
-	//URL  string `json:"original_url"`
-}
+//type RequestBatchDeleted struct {
+//	UUID string `json:"correlation_id"`
+//}
 
 type ResponseButch struct {
 	UUID string `json:"correlation_id"`
