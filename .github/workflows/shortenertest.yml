@@ -330,8 +330,6 @@ jobs:
           github.head_ref == 'iter23' ||
           github.head_ref == 'iter24'
         run: |
-          pwd
-          ls -la
           migrate -path cmd/shortener/migrations -database postgres://postgres:postgres@postgres:5432/praktikum?sslmode=disable up 3
           shortenertestbeta -test.v -test.run=^TestIteration10$ \
               -binary-path=cmd/shortener/shortener \
