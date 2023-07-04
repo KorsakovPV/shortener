@@ -14,9 +14,9 @@ import (
 
 var ErrConflict = errors.New("data conflict")
 
-type DBStorageStruct struct{}
+type DBStorage struct{}
 
-func (s *DBStorageStruct) PutURL(id string, body string, userID interface{}) (string, error) {
+func (s *DBStorage) PutURL(id string, body string, userID interface{}) (string, error) {
 
 	sugar := logging.GetSugarLogger()
 	cfg := config.GetConfig()
@@ -45,7 +45,7 @@ func (s *DBStorageStruct) PutURL(id string, body string, userID interface{}) (st
 
 }
 
-func (s *DBStorageStruct) PutURLBatch(body []models.RequestBatch, userID interface{}) ([]models.ResponseButch, error) {
+func (s *DBStorage) PutURLBatch(body []models.RequestBatch, userID interface{}) ([]models.ResponseButch, error) {
 	bodyResponseButch := make([]models.ResponseButch, len(body))
 	sugar := logging.GetSugarLogger()
 	cfg := config.GetConfig()
@@ -81,7 +81,7 @@ func (s *DBStorageStruct) PutURLBatch(body []models.RequestBatch, userID interfa
 	return bodyResponseButch, nil
 }
 
-func (s *DBStorageStruct) GetURLBatch(userID interface{}) ([]models.ResponseButchForUser, error) {
+func (s *DBStorage) GetURLBatch(userID interface{}) ([]models.ResponseButchForUser, error) {
 	bodyResponseButch := make([]models.ResponseButchForUser, 0)
 	fmt.Println(bodyResponseButch)
 	sugar := logging.GetSugarLogger()
@@ -128,7 +128,7 @@ func (s *DBStorageStruct) GetURLBatch(userID interface{}) ([]models.ResponseButc
 	return bodyResponseButch, nil
 }
 
-func (s *DBStorageStruct) GetURL(id string) (string, error) {
+func (s *DBStorage) GetURL(id string) (string, error) {
 	sugar := logging.GetSugarLogger()
 	cfg := config.GetConfig()
 	ctx := context.Background()
@@ -150,11 +150,11 @@ func (s *DBStorageStruct) GetURL(id string) (string, error) {
 	return OriginalURL, nil
 }
 
-func (s *DBStorageStruct) InitStorage() error {
+func (s *DBStorage) InitStorage() error {
 	return nil
 }
 
-func (s *DBStorageStruct) DeleteURLBatch(req []string, userID interface{}) error {
+func (s *DBStorage) DeleteURLBatch(req []string, userID interface{}) error {
 	sugar := logging.GetSugarLogger()
 	cfg := config.GetConfig()
 	ctx := context.Background()

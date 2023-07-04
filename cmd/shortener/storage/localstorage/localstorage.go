@@ -82,11 +82,11 @@ func (c *Consumer) Close() error {
 	return c.file.Close()
 }
 
-type LocalStorageStruct struct {
+type LocalStorage struct {
 	ShortURL map[string]string
 }
 
-func (s *LocalStorageStruct) PutURL(id string, body string, userID interface{}) (string, error) {
+func (s *LocalStorage) PutURL(id string, body string, userID interface{}) (string, error) {
 
 	cfg := config.GetConfig()
 
@@ -113,7 +113,7 @@ func (s *LocalStorageStruct) PutURL(id string, body string, userID interface{}) 
 	return id, nil
 }
 
-func (s *LocalStorageStruct) PutURLBatch(body []models.RequestBatch, userID interface{}) ([]models.ResponseButch, error) {
+func (s *LocalStorage) PutURLBatch(body []models.RequestBatch, userID interface{}) ([]models.ResponseButch, error) {
 	cfg := config.GetConfig()
 
 	bodyResponseButch := make([]models.ResponseButch, len(body))
@@ -157,7 +157,7 @@ func (s *LocalStorageStruct) PutURLBatch(body []models.RequestBatch, userID inte
 	return bodyResponseButch, nil
 }
 
-func (s *LocalStorageStruct) GetURL(id string) (string, error) {
+func (s *LocalStorage) GetURL(id string) (string, error) {
 	url, ok := s.ShortURL[id]
 	if !ok {
 		return url, fmt.Errorf("id %s not found", id)
@@ -166,7 +166,7 @@ func (s *LocalStorageStruct) GetURL(id string) (string, error) {
 	}
 }
 
-func (s *LocalStorageStruct) InitStorage() error {
+func (s *LocalStorage) InitStorage() error {
 	cfg := config.GetConfig()
 
 	Cons, err := NewConsumer(cfg.FlagFileStoragePath)
@@ -186,12 +186,12 @@ func (s *LocalStorageStruct) InitStorage() error {
 	return nil
 }
 
-func (s *LocalStorageStruct) GetURLBatch(userID interface{}) ([]models.ResponseButchForUser, error) {
+func (s *LocalStorage) GetURLBatch(userID interface{}) ([]models.ResponseButchForUser, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (s *LocalStorageStruct) DeleteURLBatch(req []string, userID interface{}) error {
+func (s *LocalStorage) DeleteURLBatch(req []string, userID interface{}) error {
 	//TODO implement me
 	panic("implement me")
 }

@@ -111,11 +111,11 @@ func (s Struct) InitStorage() error {
 
 var s AbstractStorage = Struct{}
 
-var localStorage AbstractStorage = &localstorage.LocalStorageStruct{
+var localStorage AbstractStorage = &localstorage.LocalStorage{
 	ShortURL: map[string]string{},
 }
 
-var dbStorage AbstractStorage = &dbstorage.DBStorageStruct{}
+var dbStorage AbstractStorage = &dbstorage.DBStorage{}
 
 func InitStorage() error {
 	sugar := logging.GetSugarLogger()
