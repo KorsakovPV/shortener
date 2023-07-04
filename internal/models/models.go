@@ -18,6 +18,11 @@ type ResponseButch struct {
 	URL  string `json:"short_url"`
 }
 
+type ResponseButchForUser struct {
+	ShortURL    string `json:"short_url"`
+	OriginalURL string `json:"original_url"`
+}
+
 type Employee struct {
 	Name   string
 	Age    int

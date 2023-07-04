@@ -14,9 +14,9 @@ import (
 
 var ErrConflict = errors.New("data conflict")
 
-type DBStorageStruct struct{}
+type DBStorage struct{}
 
-func (s *DBStorageStruct) PutURL(id string, body string) (string, error) {
+func (s *DBStorage) PutURL(id string, body string, userID interface{}) (string, error) {
 
 	sugar := logging.GetSugarLogger()
 	cfg := config.GetConfig()
@@ -30,7 +30,7 @@ func (s *DBStorageStruct) PutURL(id string, body string) (string, error) {
 	defer conn.Close(ctx)
 
 	var _id string
-	err = conn.QueryRow(ctx, "INSERT INTO public.short_url (id, original_url) VALUES ($1, $2) ON CONFLICT (original_url) DO UPDATE SET original_url=EXCLUDED.original_url RETURNING id;", id, body).Scan(&_id)
+	err = conn.QueryRow(ctx, "INSERT INTO public.short_url (id, original_url, created_by) VALUES ($1, $2, $3) ON CONFLICT (original_url) DO UPDATE SET original_url=EXCLUDED.original_url RETURNING id;", id, body, userID).Scan(&_id)
 
 	if err != nil {
 		return id, err
@@ -45,7 +45,7 @@ func (s *DBStorageStruct) PutURL(id string, body string) (string, error) {
 
 }
 
-func (s *DBStorageStruct) PutURLBatch(body []models.RequestBatch) ([]models.ResponseButch, error) {
+func (s *DBStorage) PutURLBatch(body []models.RequestBatch, userID interface{}) ([]models.ResponseButch, error) {
 	bodyResponseButch := make([]models.ResponseButch, len(body))
 	sugar := logging.GetSugarLogger()
 	cfg := config.GetConfig()
@@ -61,11 +61,11 @@ func (s *DBStorageStruct) PutURLBatch(body []models.RequestBatch) ([]models.Resp
 		if err != nil {
 			sugar.Errorf("Error %s", err)
 		}
-	}(conn, context.Background())
+	}(conn, ctx)
 
 	batch := &pgx.Batch{}
 	for i := 0; i < len(body); i++ {
-		batch.Queue("INSERT INTO short_url (id, original_url) VALUES($1, $2)", body[i].UUID, body[i].URL)
+		batch.Queue("INSERT INTO short_url (id, original_url, created_by) VALUES($1, $2, $3)", body[i].UUID, body[i].URL, userID)
 	}
 	br := conn.SendBatch(ctx, batch)
 	_, err = br.Exec()
@@ -81,7 +81,54 @@ func (s *DBStorageStruct) PutURLBatch(body []models.RequestBatch) ([]models.Resp
 	return bodyResponseButch, nil
 }
 
-func (s *DBStorageStruct) GetURL(id string) (string, error) {
+func (s *DBStorage) GetURLBatch(userID interface{}) ([]models.ResponseButchForUser, error) {
+	bodyResponseButch := make([]models.ResponseButchForUser, 0)
+	fmt.Println(bodyResponseButch)
+	sugar := logging.GetSugarLogger()
+	cfg := config.GetConfig()
+	ctx := context.Background()
+
+	conn, err := pgx.Connect(ctx, cfg.FlagDataBaseDSN)
+	if err != nil {
+		sugar.Errorf("Unable to connect to database: %v\n", err)
+		return nil, err
+	}
+	defer func(conn *pgx.Conn, ctx context.Context) {
+		err := conn.Close(ctx)
+		if err != nil {
+			sugar.Errorf("Error %s", err)
+		}
+	}(conn, ctx)
+
+	rows, err := conn.Query(ctx, "select id, original_url from public.short_url where created_by=$1", userID)
+	if err != nil {
+		sugar.Errorf("Query failed: %v\n", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var ID string
+		var OriginalURL string
+		err = rows.Scan(&ID, &OriginalURL)
+		if err != nil {
+			return nil, err
+		}
+
+		row := models.ResponseButchForUser{}
+
+		row.ShortURL = fmt.Sprintf("%s/%s", cfg.FlagBaseURLAddr, ID)
+		row.OriginalURL = OriginalURL
+
+		fmt.Println(ID, OriginalURL)
+
+		bodyResponseButch = append(bodyResponseButch, row)
+	}
+
+	return bodyResponseButch, nil
+}
+
+func (s *DBStorage) GetURL(id string) (string, error) {
 	sugar := logging.GetSugarLogger()
 	cfg := config.GetConfig()
 	ctx := context.Background()
@@ -91,10 +138,10 @@ func (s *DBStorageStruct) GetURL(id string) (string, error) {
 		sugar.Errorf("Unable to connect to database: %v\n", err)
 		return "", err
 	}
-	defer conn.Close(context.Background())
+	defer conn.Close(ctx)
 
 	var OriginalURL string
-	err = conn.QueryRow(context.Background(), "select original_url from short_url where id=$1", id).Scan(&OriginalURL)
+	err = conn.QueryRow(ctx, "select original_url from short_url where id=$1 and is_deleted=false", id).Scan(&OriginalURL)
 	if err != nil {
 		sugar.Errorf("QueryRow failed: %v\n", err)
 		return "", err
@@ -103,6 +150,32 @@ func (s *DBStorageStruct) GetURL(id string) (string, error) {
 	return OriginalURL, nil
 }
 
-func (s *DBStorageStruct) InitStorage() error {
+func (s *DBStorage) InitStorage() error {
 	return nil
+}
+
+func (s *DBStorage) DeleteURLBatch(req []string, userID interface{}) error {
+	sugar := logging.GetSugarLogger()
+	cfg := config.GetConfig()
+	ctx := context.Background()
+
+	conn, err := pgx.Connect(ctx, cfg.FlagDataBaseDSN)
+	if err != nil {
+		sugar.Errorf("Unable to connect to database: %v\n", err)
+		return err
+	}
+	defer func(conn *pgx.Conn, ctx context.Context) {
+		err := conn.Close(ctx)
+		if err != nil {
+			sugar.Errorf("Error %s", err)
+		}
+	}(conn, ctx)
+
+	batch := &pgx.Batch{}
+	for i := 0; i < len(req); i++ {
+		batch.Queue("UPDATE public.short_url SET is_deleted = true WHERE id = $1 and created_by = $2;", req[i], userID)
+	}
+	br := conn.SendBatch(ctx, batch)
+	_, err = br.Exec()
+	return err
 }
