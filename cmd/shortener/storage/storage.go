@@ -10,23 +10,25 @@ import (
 )
 
 type AbstractStorage interface {
-	PutURL(string, string) (string, error)
+	PutURL(string, string, interface{}) (string, error)
 	GetURL(string) (string, error)
-	PutURLBatch([]models.RequestBatch) ([]models.ResponseButch, error)
+	PutURLBatch([]models.RequestBatch, interface{}) ([]models.ResponseButch, error)
+	GetURLBatch(interface{}) ([]models.ResponseButchForUser, error)
+	DeleteURLBatch([]string, interface{}) error
 	InitStorage() error
 }
 
 type Struct struct{}
 
-func (s Struct) PutURL(id string, body string) (string, error) {
+func (s Struct) PutURL(id string, body string, userID interface{}) (string, error) {
 	cfg := config.GetConfig()
 
 	if cfg.FlagDataBaseDSN != "" {
-		id, err := dbStorage.PutURL(id, body)
+		id, err := dbStorage.PutURL(id, body, userID)
 		return id, err
 	}
 
-	_, err := localStorage.PutURL(id, body)
+	_, err := localStorage.PutURL(id, body, userID)
 	if err != nil {
 		return "", err
 	}
@@ -52,18 +54,49 @@ func (s Struct) GetURL(id string) (string, error) {
 	return url, err
 }
 
-func (s Struct) PutURLBatch(body []models.RequestBatch) ([]models.ResponseButch, error) {
+func (s Struct) GetURLBatch(userID interface{}) ([]models.ResponseButchForUser, error) {
 	cfg := config.GetConfig()
 
 	if cfg.FlagDataBaseDSN != "" {
-		bodyResponseButch, err := dbStorage.PutURLBatch(body)
+		bodyResponseButch, err := dbStorage.GetURLBatch(userID)
 		if err != nil {
 			return nil, err
 		}
 		return bodyResponseButch, nil
 	}
 
-	bodyResponseButch, err := localStorage.PutURLBatch(body)
+	bodyResponseButch, err := localStorage.GetURLBatch(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return bodyResponseButch, nil
+}
+
+func (s Struct) DeleteURLBatch(req []string, userID interface{}) error {
+	cfg := config.GetConfig()
+
+	if cfg.FlagDataBaseDSN != "" {
+		err := dbStorage.DeleteURLBatch(req, userID)
+		return err
+	}
+
+	err := localStorage.DeleteURLBatch(req, userID)
+	return err
+}
+
+func (s Struct) PutURLBatch(body []models.RequestBatch, userID interface{}) ([]models.ResponseButch, error) {
+	cfg := config.GetConfig()
+
+	if cfg.FlagDataBaseDSN != "" {
+		bodyResponseButch, err := dbStorage.PutURLBatch(body, userID)
+		if err != nil {
+			return nil, err
+		}
+		return bodyResponseButch, nil
+	}
+
+	bodyResponseButch, err := localStorage.PutURLBatch(body, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -78,11 +111,11 @@ func (s Struct) InitStorage() error {
 
 var s AbstractStorage = Struct{}
 
-var localStorage AbstractStorage = &localstorage.LocalStorageStruct{
+var localStorage AbstractStorage = &localstorage.LocalStorage{
 	ShortURL: map[string]string{},
 }
 
-var dbStorage AbstractStorage = &dbstorage.DBStorageStruct{}
+var dbStorage AbstractStorage = &dbstorage.DBStorage{}
 
 func InitStorage() error {
 	sugar := logging.GetSugarLogger()
